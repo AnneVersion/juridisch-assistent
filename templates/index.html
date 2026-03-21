@@ -1,0 +1,2860 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juridisch Assistent — Uw recht, uw handen</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='28' font-size='28'>&#x2696;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a; --bg2: #111827; --bg3: #1e293b;
+  --surface: rgba(30,41,59,.65); --glass: rgba(30,41,59,.45);
+  --glass-bd: rgba(148,163,184,.15);
+  --tx: #f1f5f9; --tx2: #94a3b8; --tx3: #64748b;
+  --accent: #3b82f6; --accent2: #2563eb;
+  --accent-soft: rgba(59,130,246,.12);
+  --red: #ef4444; --red-soft: rgba(239,68,68,.12);
+  --green: #22c55e; --green-soft: rgba(34,197,94,.12);
+  --yellow: #eab308; --yellow-soft: rgba(234,179,8,.12);
+  --purple: #a855f7; --purple-soft: rgba(168,85,247,.12);
+  --r: 14px; --rs: 8px;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --max-w: 1100px;
+  --tr: .2s cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--tx); line-height: 1.6; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148,163,184,.25); border-radius: 10px; }
+a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+.mi { font-family: 'Material Icons Round'; font-size: 20px; vertical-align: -4px; }
+.mi-sm { font-size: 16px; vertical-align: -3px; }
+
+/* LAYOUT */
+.shell { display: flex; flex-direction: column; min-height: 100vh; }
+.top { position: sticky; top: 0; z-index: 100; background: rgba(10,14,26,.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--glass-bd); padding: 0 20px; }
+.top-inner { max-width: var(--max-w); margin: 0 auto; display: flex; align-items: center; height: 54px; gap: 8px; }
+.logo { font-weight: 700; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.logo .mi { color: var(--accent); font-size: 24px; }
+.logo b { color: var(--accent); }
+.spacer { flex: 1; }
+.nav-links { display: flex; gap: 4px; align-items: center; }
+.nav-btn { padding: 6px 14px; border-radius: var(--rs); font: 500 13px var(--font); color: var(--tx2); cursor: pointer; border: none; background: none; transition: var(--tr); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.nav-btn:hover { color: var(--tx); background: var(--glass); }
+.nav-btn.active { color: var(--tx); background: var(--surface); }
+.nav-btn.cta { background: var(--accent); color: #fff; font-weight: 600; }
+.nav-btn.cta:hover { background: var(--accent2); }
+.hamburger { display: none; background: none; border: none; color: var(--tx); cursor: pointer; padding: 4px; }
+@media(max-width:768px){
+  .nav-links { display: none; position: absolute; top: 54px; left: 0; right: 0; background: rgba(10,14,26,.95); backdrop-filter: blur(16px); flex-direction: column; padding: 12px; border-bottom: 1px solid var(--glass-bd); gap: 4px; }
+  .nav-links.open { display: flex; }
+  .hamburger { display: block; }
+}
+.main { flex: 1; max-width: var(--max-w); margin: 0 auto; padding: 24px 20px; width: 100%; }
+.footer { background: var(--bg2); border-top: 1px solid var(--glass-bd); padding: 16px; text-align: center; font-size: 11px; color: var(--tx3); }
+
+/* COMPONENTS */
+.card { background: var(--surface); border: 1px solid var(--glass-bd); border-radius: var(--r); padding: 20px; backdrop-filter: blur(8px); transition: var(--tr); }
+.card:hover { border-color: rgba(148,163,184,.25); }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: var(--rs); font: 600 13px var(--font); border: 1px solid transparent; cursor: pointer; transition: var(--tr); text-decoration: none; }
+.btn-blue { background: var(--accent); color: #fff; } .btn-blue:hover { background: var(--accent2); text-decoration: none; }
+.btn-red { background: var(--red); color: #fff; } .btn-red:hover { background: #dc2626; text-decoration: none; }
+.btn-green { background: var(--green); color: #fff; } .btn-green:hover { background: #16a34a; text-decoration: none; }
+.btn-ghost { background: var(--glass); color: var(--tx); border-color: var(--glass-bd); } .btn-ghost:hover { background: var(--surface); text-decoration: none; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn .mi { font-size: 16px; }
+
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font: 600 11px var(--font); }
+.badge-blue { background: var(--accent-soft); color: var(--accent); }
+.badge-red { background: var(--red-soft); color: var(--red); }
+.badge-green { background: var(--green-soft); color: var(--green); }
+.badge-yellow { background: var(--yellow-soft); color: var(--yellow); }
+.badge-purple { background: var(--purple-soft); color: var(--purple); }
+
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font: 500 13px var(--font); color: var(--tx2); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--rs); color: var(--tx); font: 14px var(--font); transition: var(--tr); }
+.form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+textarea.form-input { min-height: 100px; resize: vertical; }
+select.form-input { cursor: pointer; }
+
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.dot-green { background: var(--green); } .dot-red { background: var(--red); } .dot-yellow { background: var(--yellow); } .dot-gray { background: var(--tx3); }
+
+.section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-title .mi { font-size: 24px; color: var(--accent); }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--tx3); }
+.empty-state .mi { font-size: 48px; display: block; margin-bottom: 12px; opacity: .5; }
+
+.toast-box { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column-reverse; gap: 8px; }
+.toast { background: var(--surface); border: 1px solid var(--glass-bd); backdrop-filter: blur(12px); padding: 10px 18px; border-radius: var(--rs); font-size: 13px; color: var(--tx); box-shadow: 0 8px 32px rgba(0,0,0,.3); animation: tIn .3s ease; max-width: 380px; }
+@keyframes tIn { from { opacity: 0; transform: translateY(10px); } }
+
+/* TABS */
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--glass-bd); margin-bottom: 20px; }
+.tab { padding: 10px 18px; font: 500 13px var(--font); color: var(--tx3); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; transition: var(--tr); display: flex; align-items: center; gap: 6px; }
+.tab:hover { color: var(--tx2); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab .mi { font-size: 16px; }
+
+/* DIFF VIEW */
+.diff-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:768px){ .diff-container { grid-template-columns: 1fr; } }
+.diff-panel { background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--rs); padding: 16px; max-height: 500px; overflow-y: auto; font-size: 13px; line-height: 1.8; white-space: pre-wrap; }
+.diff-panel h4 { font-size: 12px; color: var(--tx3); margin-bottom: 8px; text-transform: uppercase; }
+.highlight-pii { background: rgba(239,68,68,.2); padding: 1px 4px; border-radius: 3px; color: var(--red); }
+.highlight-anon { background: rgba(59,130,246,.2); padding: 1px 4px; border-radius: 3px; color: var(--accent); }
+
+/* MAPPING TABLE */
+.map-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+.map-table th { text-align: left; color: var(--tx3); font-weight: 600; font-size: 11px; text-transform: uppercase; padding: 8px; border-bottom: 1px solid var(--glass-bd); }
+.map-table td { padding: 8px; border-bottom: 1px solid rgba(148,163,184,.08); }
+.map-table input { background: var(--bg); border: 1px solid var(--glass-bd); border-radius: 4px; padding: 4px 8px; color: var(--tx); font: 12px var(--font); width: 100%; }
+
+/* EMAIL BODY */
+.email-body-html { word-break: break-word; }
+.email-body-html img { max-width: 100%; height: auto; }
+.email-body-html table { max-width: 100%; }
+.email-body-html a { color: var(--accent); }
+
+/* ANALYSIS RESULT */
+.analysis-card { background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--r); padding: 20px; margin-bottom: 16px; }
+.analysis-card h3 { font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.analysis-body { font-size: 14px; line-height: 1.8; color: var(--tx2); white-space: pre-wrap; }
+
+/* SAMENVATTING CARD */
+.samenvatting-card { background: var(--bg2); border: 1px solid var(--accent); border-radius: var(--r); padding: 20px; margin-bottom: 16px; }
+.samenvatting-card h3 { font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.samenvatting-body { font-size: 14px; line-height: 1.8; color: var(--tx2); white-space: pre-wrap; }
+.samenvatting-stale { border-color: #eab308; background: rgba(234,179,8,.05); }
+.samenvatting-actions { display: flex; gap: 6px; margin-top: 12px; }
+.samenvatting-meta { font-size: 11px; color: var(--tx3); margin-top: 8px; }
+
+/* LOADING */
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--glass-bd); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading { text-align: center; padding: 40px; color: var(--tx3); }
+
+/* HERO */
+.hero { text-align: center; padding: 48px 20px 32px; }
+.hero-icon { font-size: 56px; margin-bottom: 12px; display: block; opacity: .9; }
+.hero h1 { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 8px; }
+.hero h1 span { color: var(--accent); }
+.hero p { font-size: 15px; color: var(--tx2); max-width: 600px; margin: 0 auto 24px; line-height: 1.7; }
+.hero-privacy { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--green); background: var(--green-soft); padding: 6px 14px; border-radius: 20px; margin-bottom: 24px; }
+
+/* STEPS */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0 32px; }
+.step { background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--r); padding: 20px; text-align: center; position: relative; }
+.step-num { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; width: 24px; height: 24px; border-radius: 50%; font: 700 12px var(--font); display: flex; align-items: center; justify-content: center; }
+.step .mi { font-size: 32px; color: var(--accent); display: block; margin-bottom: 8px; }
+.step h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.step p { font-size: 12px; color: var(--tx3); line-height: 1.5; }
+
+/* PROCEDURE CARDS */
+.proc-card { background: var(--surface); border: 1px solid var(--glass-bd); border-radius: var(--r); overflow: hidden; transition: var(--tr); }
+.proc-card:hover { border-color: rgba(148,163,184,.3); transform: translateY(-2px); }
+.proc-header { padding: 16px 20px; border-bottom: 1px solid var(--glass-bd); display: flex; align-items: center; gap: 12px; }
+.proc-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.proc-icon .mi { font-size: 22px; color: #fff; }
+.proc-body { padding: 16px 20px; }
+.proc-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.proc-meta-item { font-size: 12px; color: var(--tx2); display: flex; align-items: center; gap: 4px; }
+.proc-meta-item .mi { font-size: 14px; color: var(--tx3); }
+.proc-desc { font-size: 13px; color: var(--tx2); line-height: 1.6; margin-bottom: 12px; }
+.proc-steps { list-style: none; }
+.proc-steps li { font-size: 12px; color: var(--tx3); padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+.proc-steps li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.proc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+
+/* HEALTH EXPANDED */
+.health-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.health-item { background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--rs); padding: 12px; display: flex; align-items: center; gap: 10px; }
+.health-item .mi { font-size: 20px; }
+.health-label { font-size: 12px; font-weight: 600; }
+.health-desc { font-size: 10px; color: var(--tx3); }
+
+/* CATEGORY HEADER */
+.cat-header { display: flex; align-items: center; gap: 10px; margin: 32px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--glass-bd); }
+.cat-header .mi { font-size: 22px; color: var(--accent); }
+.cat-header h2 { font-size: 17px; font-weight: 700; }
+.cat-header span { font-size: 12px; color: var(--tx3); }
+
+/* LEGAL REFERENCE PAGE */
+.legal-intro { background: linear-gradient(135deg, rgba(59,130,246,.08), rgba(168,85,247,.06)); border: 1px solid var(--glass-bd); border-radius: var(--r); padding: 28px 24px; margin-bottom: 28px; }
+.legal-intro h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.legal-intro p { font-size: 14px; color: var(--tx2); line-height: 1.7; max-width: 800px; }
+
+.legal-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px; padding: 16px 20px; background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--rs); }
+.legal-flow-item { padding: 6px 14px; border-radius: 20px; font: 600 12px var(--font); white-space: nowrap; cursor: pointer; transition: var(--tr); }
+.legal-flow-item:hover { filter: brightness(1.2); }
+.legal-flow-arrow { color: var(--tx3); font-size: 16px; user-select: none; }
+
+.legal-cat-section { margin-bottom: 40px; }
+.legal-cat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 14px 20px; background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--r); }
+.legal-cat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.legal-cat-icon .mi { font-size: 22px; color: #fff; }
+.legal-cat-header h2 { font-size: 18px; font-weight: 700; flex: 1; }
+.legal-cat-header .badge { font-size: 11px; }
+
+.legal-card { background: var(--surface); border: 1px solid var(--glass-bd); border-radius: var(--r); margin-bottom: 16px; overflow: hidden; transition: var(--tr); }
+.legal-card.expanded .legal-card-body { display: block; }
+.legal-card-top { padding: 18px 20px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: var(--tr); }
+.legal-card-top:hover { background: rgba(59,130,246,.04); }
+.legal-card-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.legal-card-icon .mi { font-size: 24px; color: #fff; }
+.legal-card-info { flex: 1; min-width: 0; }
+.legal-card-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.legal-card-info .legal-sub { font-size: 12px; color: var(--tx3); display: flex; flex-wrap: wrap; gap: 12px; }
+.legal-card-info .legal-sub span { display: inline-flex; align-items: center; gap: 3px; }
+.legal-card-info .legal-sub .mi { font-size: 13px; }
+.legal-card-chevron { color: var(--tx3); transition: transform .2s ease; font-size: 24px; }
+.legal-card.expanded .legal-card-chevron { transform: rotate(180deg); }
+.legal-card-body { display: none; border-top: 1px solid var(--glass-bd); }
+
+.legal-section { padding: 16px 20px; border-bottom: 1px solid rgba(148,163,184,.06); }
+.legal-section:last-child { border-bottom: none; }
+.legal-section h4 { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.legal-section h4 .mi { font-size: 16px; }
+.legal-section p, .legal-section .legal-text { font-size: 13px; color: var(--tx2); line-height: 1.8; white-space: pre-line; }
+.legal-section ul { list-style: none; margin: 0; padding: 0; }
+.legal-section ul li { font-size: 13px; color: var(--tx2); padding: 4px 0 4px 20px; position: relative; line-height: 1.6; }
+.legal-section ul li::before { content: ''; position: absolute; left: 6px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+.legal-articles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 6px; }
+.legal-article { display: flex; gap: 10px; padding: 8px 12px; background: var(--bg2); border-radius: var(--rs); font-size: 12px; }
+.legal-article-ref { font-weight: 700; color: var(--accent); white-space: nowrap; min-width: 100px; }
+.legal-article-desc { color: var(--tx2); }
+
+.legal-tips { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.legal-tip { display: flex; gap: 8px; padding: 8px 12px; background: rgba(234,179,8,.06); border: 1px solid rgba(234,179,8,.12); border-radius: var(--rs); font-size: 12px; color: var(--tx2); align-items: start; }
+.legal-tip .mi { font-size: 14px; color: var(--yellow); flex-shrink: 0; margin-top: 1px; }
+
+.legal-steps-flow { display: flex; flex-direction: column; gap: 0; }
+.legal-step { display: flex; align-items: start; gap: 12px; padding: 8px 0; position: relative; }
+.legal-step-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 700 11px var(--font); color: #fff; flex-shrink: 0; position: relative; z-index: 1; }
+.legal-step:not(:last-child)::before { content: ''; position: absolute; left: 13px; top: 34px; bottom: -8px; width: 1px; background: var(--glass-bd); }
+.legal-step-text { font-size: 13px; color: var(--tx2); padding-top: 3px; }
+
+.legal-badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.legal-badge-item { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+
+.legal-filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.legal-filter-btn { padding: 7px 16px; border-radius: 20px; font: 500 13px var(--font); border: 1px solid var(--glass-bd); background: var(--bg2); color: var(--tx2); cursor: pointer; transition: var(--tr); display: flex; align-items: center; gap: 5px; }
+.legal-filter-btn:hover { border-color: var(--accent); color: var(--tx); }
+.legal-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* FOLDER BROWSER */
+.fb-modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; } }
+.fb-box { background: var(--bg); border: 1px solid var(--glass-bd); border-radius: var(--r); width: 90%; max-width: 700px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 24px 48px rgba(0,0,0,.4); }
+.fb-header { padding: 14px 20px; border-bottom: 1px solid var(--glass-bd); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.fb-header h3 { font-size: 15px; font-weight: 700; flex: 1; }
+.fb-path { padding: 8px 20px; background: var(--bg2); border-bottom: 1px solid var(--glass-bd); font-size: 12px; color: var(--tx2); display: flex; align-items: center; gap: 6px; flex-shrink: 0; overflow-x: auto; white-space: nowrap; }
+.fb-path-seg { cursor: pointer; color: var(--accent); padding: 2px 4px; border-radius: 3px; }
+.fb-path-seg:hover { background: var(--accent-soft); }
+.fb-body { flex: 1; overflow-y: auto; padding: 4px 0; min-height: 200px; }
+.fb-item { display: flex; align-items: center; gap: 10px; padding: 8px 20px; cursor: pointer; transition: var(--tr); font-size: 13px; }
+.fb-item:hover { background: var(--glass); }
+.fb-item.selected { background: var(--accent-soft); border-left: 3px solid var(--accent); }
+.fb-item .mi { font-size: 20px; flex-shrink: 0; }
+.fb-item-info { flex: 1; min-width: 0; }
+.fb-item-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fb-item-meta { font-size: 11px; color: var(--tx3); }
+.fb-item.folder .mi { color: var(--yellow); }
+.fb-item.drive .mi { color: var(--accent); }
+.fb-item.shortcut .mi { color: var(--green); }
+.fb-item.file .mi { color: var(--tx3); }
+.fb-item.file.supported .mi { color: var(--green); }
+.fb-footer { padding: 12px 20px; border-top: 1px solid var(--glass-bd); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.fb-selected-path { flex: 1; font-size: 12px; color: var(--tx2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* TIMELINE */
+.tl-container { position: relative; padding-left: 28px; }
+.tl-line { position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: var(--glass-bd); }
+.tl-item { position: relative; margin-bottom: 12px; }
+.tl-dot { position: absolute; left: -23px; top: 14px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg); z-index: 1; }
+.tl-dot.doc { background: var(--accent); }
+.tl-dot.email { background: var(--purple); }
+.tl-card { background: var(--surface); border: 1px solid var(--glass-bd); border-radius: var(--rs); padding: 12px 16px; transition: var(--tr); cursor: pointer; }
+.tl-card:hover { border-color: rgba(148,163,184,.3); }
+.tl-card.email-card { border-left: 3px solid var(--purple); }
+.tl-card.doc-card { border-left: 3px solid var(--accent); }
+.tl-date-header { font-size: 12px; font-weight: 700; color: var(--tx2); margin: 20px 0 8px -28px; padding: 4px 12px; background: var(--bg2); border-radius: var(--rs); display: inline-block; }
+.tl-date-header:first-child { margin-top: 0; }
+.tl-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+.tl-sub { font-size: 12px; color: var(--tx3); line-height: 1.5; }
+.tl-meta { font-size: 11px; color: var(--tx3); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+.tl-meta span { display: inline-flex; align-items: center; gap: 3px; }
+.tl-meta .mi { font-size: 13px; }
+.tl-filter { display: flex; gap: 6px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+.tl-filter-btn { padding: 5px 14px; border-radius: 16px; font: 500 12px var(--font); border: 1px solid var(--glass-bd); background: var(--bg2); color: var(--tx2); cursor: pointer; transition: var(--tr); display: flex; align-items: center; gap: 4px; }
+.tl-filter-btn:hover { border-color: var(--accent); color: var(--tx); }
+.tl-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* EMAIL DETAIL MODAL */
+.email-modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; animation: fadeIn .2s ease; }
+.email-modal-box { background: var(--bg); border: 1px solid var(--glass-bd); border-radius: var(--r); width: 90%; max-width: 700px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 24px 48px rgba(0,0,0,.4); }
+.email-modal-header { padding: 14px 20px; border-bottom: 1px solid var(--glass-bd); display: flex; align-items: center; gap: 8px; }
+.email-modal-header h3 { font-size: 15px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.email-modal-meta { padding: 10px 20px; border-bottom: 1px solid var(--glass-bd); font-size: 12px; color: var(--tx2); background: var(--bg2); line-height: 1.8; }
+.email-modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; font-size: 13px; color: var(--tx); line-height: 1.7; }
+.email-modal-body iframe { width: 100%; border: none; min-height: 300px; background: #fff; border-radius: var(--rs); }
+
+/* SCAN PREVIEW */
+.scan-preview { background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--r); margin-top: 12px; overflow: hidden; }
+.scan-header { padding: 12px 16px; border-bottom: 1px solid var(--glass-bd); display: flex; align-items: center; gap: 8px; }
+.scan-header .mi { color: var(--green); }
+.scan-stats { display: flex; gap: 16px; padding: 10px 16px; font-size: 12px; color: var(--tx2); border-bottom: 1px solid rgba(148,163,184,.06); }
+.scan-stat { display: flex; align-items: center; gap: 4px; }
+.scan-stat .mi { font-size: 14px; color: var(--tx3); }
+.scan-subfolder { border-bottom: 1px solid rgba(148,163,184,.06); }
+.scan-subfolder:last-child { border-bottom: none; }
+.scan-subfolder-head { padding: 8px 16px; font-size: 12px; font-weight: 600; color: var(--tx); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.scan-subfolder-head:hover { background: var(--glass); }
+.scan-subfolder-head .mi { font-size: 16px; color: var(--yellow); }
+.scan-subfolder-head .count { color: var(--tx3); font-weight: 400; }
+.scan-file { padding: 4px 16px 4px 36px; font-size: 11px; color: var(--tx3); display: flex; align-items: center; gap: 6px; }
+.scan-file .mi { font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="top-inner">
+      <div class="logo" onclick="go('/')"><span class="mi">balance</span> Juridisch <b>Assistent</b></div>
+      <div class="spacer"></div>
+      <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span class="mi">menu</span></button>
+      <nav class="nav-links" id="navLinks">
+        <button class="nav-btn" data-r="/" onclick="go('/')"><span class="mi mi-sm">dashboard</span> Dashboard</button>
+        <button class="nav-btn" data-r="/procedures" onclick="go('/procedures')"><span class="mi mi-sm">gavel</span> Procedures</button>
+        <button class="nav-btn" data-r="/emails" onclick="go('/emails')"><span class="mi mi-sm">email</span> E-mails</button>
+        <a class="nav-btn" href="/scanner" style="text-decoration:none"><span class="mi mi-sm">document_scanner</span> Scanner</a>
+        <button class="nav-btn" data-r="/instellingen" onclick="go('/instellingen')"><span class="mi mi-sm">settings</span> Instellingen</button>
+        <button class="nav-btn cta" onclick="go('/nieuw')"><span class="mi mi-sm">add_circle</span> Nieuwe zaak</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main" id="app">
+    <div class="loading"><div class="spinner"></div></div>
+  </main>
+
+  <footer class="footer">Juridisch Assistent — Alle data blijft lokaal op uw computer. <span style="color:var(--accent)">&#x2696;</span></footer>
+</div>
+<div class="toast-box" id="toasts"></div>
+
+<script>
+// ============================================================
+// GLOBALS & HELPERS
+// ============================================================
+var API = '/api';
+var _route = '/', _routeId = '';
+var _health = null;
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function toast(msg) {
+  var box = document.getElementById('toasts');
+  var t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  box.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 4000);
+}
+function fmtBytes(b) { if (!b) return '0 B'; var u = ['B','KB','MB','GB']; var i = Math.floor(Math.log(b)/Math.log(1024)); return (b/Math.pow(1024,i)).toFixed(i?1:0)+' '+u[i]; }
+function fmtDate(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'}); }
+function fmtDateTime(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+
+function apiFetch(url, opts, cb) {
+  if (typeof opts === 'function') { cb = opts; opts = {}; }
+  opts = opts || {};
+  var o = { method: opts.method || 'GET', headers: {} };
+  if (opts.body) { o.body = JSON.stringify(opts.body); o.headers['Content-Type'] = 'application/json'; }
+  fetch(API + url, o)
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; }); })
+    .then(function(res){ cb(null, res.data, res.ok); })
+    .catch(function(e){ cb(e.message || 'Netwerkfout'); });
+}
+
+// ============================================================
+// ROUTER (zelfde patroon als meldpunt)
+// ============================================================
+function go(path) { window.location.hash = '#' + path; }
+
+function parseRoute() {
+  var h = (window.location.hash || '#/').slice(1);
+  var parts = h.split('/').filter(Boolean);
+  _route = '/' + (parts[0] || '');
+  _routeId = parts[1] || '';
+  // Sub-routes
+  if (parts[2]) _route += '/' + parts[0]; // for tab tracking
+}
+
+window.addEventListener('hashchange', function(){ parseRoute(); render(); });
+window.addEventListener('load', function(){ parseRoute(); render(); });
+
+function render() {
+  parseRoute();
+  var app = document.getElementById('app');
+
+  // Update nav active state
+  document.querySelectorAll('.nav-btn[data-r]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.r === _route || (_route.startsWith(b.dataset.r) && b.dataset.r !== '/'));
+  });
+
+  switch(_route) {
+    case '/':         app.innerHTML = pgDashboard(); break;
+    case '/nieuw':    app.innerHTML = pgNieuweZaak(); break;
+    case '/zaak':     pgZaak(_routeId); break;
+    case '/document': pgDocument(_routeId); break;
+    case '/anonimiseer': pgAnonReview(_routeId); break;
+    case '/analyse':  pgAnalyse(_routeId); break;
+    case '/procedures': app.innerHTML = pgProcedures(); break;
+    case '/emails': pgEmails(); break;
+    case '/email': pgEmailDetail(_routeId); break;
+    case '/instellingen': pgInstellingen(); break;
+    default: app.innerHTML = pgDashboard();
+  }
+}
+
+// ============================================================
+// PAGES
+// ============================================================
+
+// ---- DASHBOARD ----
+function pgDashboard() {
+  var h = '<div id="dashContent"><div class="loading"><div class="spinner"></div></div></div>';
+  setTimeout(loadDashboard, 10);
+  return h;
+}
+
+function loadDashboard() {
+  // Eerst settings ophalen om te kijken of hoofdmap is ingesteld
+  apiFetch('/settings', function(err, settings) {
+    var el = document.getElementById('dashContent');
+    if (!el) return;
+
+    var hoofdmap = (settings && settings.hoofdmap) ? settings.hoofdmap : '';
+
+    if (!hoofdmap) {
+      // ===== GEEN HOOFDMAP — WELKOM SCHERM =====
+      renderWelcome(el);
+    } else {
+      // ===== HOOFDMAP INGESTELD — ZAKEN TONEN =====
+      renderHoofdmap(el, hoofdmap);
+    }
+  });
+}
+
+function renderWelcome(el) {
+  var h = '';
+
+  h += '<div class="hero">';
+  h += '<div class="hero-icon">&#x2696;&#xFE0F;</div>';
+  h += '<h1>Uw recht, <span>uw handen</span></h1>';
+  h += '<p>Welkom bij de Juridisch Assistent. Selecteer de map op uw computer waar al uw rechtszaken staan. Elke submap wordt automatisch als aparte zaak herkend met alle documenten erin.</p>';
+  h += '<div class="hero-privacy"><span class="mi mi-sm">lock</span> Alle documenten blijven op uw eigen computer.</div>';
+  h += '</div>';
+
+  // Stappen
+  h += '<div class="steps">';
+  h += '<div class="step"><div class="step-num">1</div><span class="mi">folder_open</span><h3>Map kiezen</h3><p>Kies de map waar al uw rechtszaken als submappen staan.</p></div>';
+  h += '<div class="step"><div class="step-num">2</div><span class="mi">search</span><h3>Automatisch scannen</h3><p>Elke submap wordt een zaak. Alle PDF\'s, scans en brieven worden gevonden.</p></div>';
+  h += '<div class="step"><div class="step-num">3</div><span class="mi">psychology</span><h3>AI analyseert</h3><p>De AI leest uw documenten en adviseert de juiste juridische procedure.</p></div>';
+  h += '<div class="step"><div class="step-num">4</div><span class="mi">edit_document</span><h3>Actie ondernemen</h3><p>Bezwaar, klacht of beroep — automatisch opgesteld, klaar om in te dienen.</p></div>';
+  h += '</div>';
+
+  // CTA: folder kiezen
+  h += '<div style="text-align:center;margin:16px 0 32px">';
+  h += '<button class="btn btn-blue" style="padding:14px 36px;font-size:16px" onclick="openFolderBrowser(null, onHoofdmapSelected)"><span class="mi">folder_open</span> Kies uw map met rechtszaken</button>';
+  h += '</div>';
+
+  // Voorbeeld structuur
+  h += '<div class="card" style="max-width:500px;margin:0 auto">';
+  h += '<h3 style="font-size:13px;color:var(--tx3);margin-bottom:10px"><span class="mi mi-sm">info</span> Uw mapstructuur moet er zo uitzien:</h3>';
+  h += '<div style="font-family:monospace;font-size:12px;color:var(--tx2);line-height:2;padding-left:4px">';
+  h += '<span style="color:var(--yellow)">&#128193;</span> Mijn Rechtszaken<br>';
+  h += '&nbsp;&nbsp;&nbsp;<span style="color:var(--yellow)">&#128193;</span> Bezwaar WOZ 2024<br>';
+  h += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#128196; beschikking.pdf<br>';
+  h += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#128196; bezwaarschrift.docx<br>';
+  h += '&nbsp;&nbsp;&nbsp;<span style="color:var(--yellow)">&#128193;</span> Klacht Belastingdienst<br>';
+  h += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#128196; klacht.pdf<br>';
+  h += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#128196; reactie.pdf<br>';
+  h += '&nbsp;&nbsp;&nbsp;<span style="color:var(--yellow)">&#128193;</span> WOO verzoek Gemeente<br>';
+  h += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#128196; verzoek.pdf<br>';
+  h += '</div>';
+  h += '</div>';
+
+  el.innerHTML = h;
+}
+
+function onHoofdmapSelected() {
+  // Wordt aangeroepen na het selecteren van een map in de folder browser
+  var folder = _selectedFolder;
+  if (!folder) return;
+
+  // Sla op als hoofdmap
+  apiFetch('/settings', { method: 'PUT', body: { hoofdmap: folder } }, function() {
+    // Scan en toon preview
+    var el = document.getElementById('dashContent');
+    if (el) renderHoofdmap(el, folder);
+  });
+}
+
+function renderHoofdmap(el, hoofdmap) {
+  var h = '';
+
+  // Header met pad en wijzig-knop
+  h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">';
+  h += '<span class="mi" style="font-size:28px;color:var(--yellow)">folder_open</span>';
+  h += '<div style="flex:1;min-width:200px">';
+  h += '<h1 style="font-size:22px;font-weight:800">Mijn rechtszaken</h1>';
+  h += '<div style="font-size:12px;color:var(--tx3);display:flex;align-items:center;gap:4px"><span class="mi mi-sm">folder</span> ' + esc(hoofdmap) + '</div>';
+  h += '</div>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="openFolderBrowser(null, onHoofdmapSelected)"><span class="mi">edit</span> Andere map</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="refreshHoofdmap(\'' + esc(hoofdmap.replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + '\')"><span class="mi">refresh</span> Vernieuwen</button>';
+  h += '<button class="btn btn-blue btn-sm" onclick="go(\'/nieuw\')"><span class="mi">add_circle</span> Losse zaak</button>';
+  h += '</div>';
+
+  // Health bar compact
+  h += '<div id="healthBar" style="margin-bottom:16px"></div>';
+
+  // Scan resultaten
+  h += '<div id="rootScanResults"><div class="loading"><div class="spinner"></div></div></div>';
+
+  // Bestaande zaken die al geimporteerd zijn
+  h += '<div id="zakenSection"></div>';
+
+  el.innerHTML = h;
+
+  // Health laden
+  loadHealthBar();
+
+  // Scan de hoofdmap
+  scanRootFolder(hoofdmap);
+
+  // Bestaande zaken laden
+  loadExistingZaken();
+}
+
+function refreshHoofdmap(pad) {
+  var el = document.getElementById('dashContent');
+  if (el) renderHoofdmap(el, pad);
+}
+
+function loadHealthBar() {
+  apiFetch('/health', function(err, data) {
+    if (err) return;
+    _health = data;
+    var hb = document.getElementById('healthBar');
+    if (!hb) return;
+    var h = '<div class="health-grid">';
+    h += healthItem('smart_toy', 'Ollama', data.ollama.available ? 'Verbonden' : 'Niet actief', data.ollama.available ? 'var(--green)' : 'var(--tx3)');
+    h += healthItem('cloud', 'Cloud AI', data.cloud_ai.has_key ? data.cloud_ai.provider : 'Geen key', data.cloud_ai.has_key ? 'var(--green)' : 'var(--yellow)');
+    h += healthItem('description', 'PDF', data.document_processing.pdf ? 'OK' : 'Niet beschikbaar', data.document_processing.pdf ? 'var(--green)' : 'var(--red)');
+    h += healthItem('camera', 'OCR', data.document_processing.ocr ? 'OK' : 'Niet beschikbaar', data.document_processing.ocr ? 'var(--green)' : 'var(--yellow)');
+    h += healthItem('flag', 'Meldpunt', data.meldpunt.available ? 'Online' : 'Offline', data.meldpunt.available ? 'var(--green)' : 'var(--tx3)');
+    h += '</div>';
+    hb.innerHTML = h;
+  });
+}
+
+function scanRootFolder(pad) {
+  var el = document.getElementById('rootScanResults');
+  if (!el) return;
+
+  apiFetch('/browse/scan-root', { method: 'POST', body: { path: pad } }, function(err, data) {
+    if (!el) return;
+    if (err) { el.innerHTML = '<div class="card" style="color:var(--red);padding:16px"><span class="mi">error</span> ' + esc(err) + '</div>'; return; }
+
+    if (!data.zaken || data.zaken.length === 0) {
+      el.innerHTML = '<div class="card" style="text-align:center;padding:32px;color:var(--tx3)">' +
+        '<span class="mi" style="font-size:40px;display:block;margin-bottom:8px;opacity:.4">folder_off</span>' +
+        '<p>Geen submappen met documenten gevonden.</p>' +
+        '<p style="font-size:12px;margin-top:4px">Maak submappen aan voor elke rechtszaak en plaats daar uw brieven en documenten.</p></div>';
+      return;
+    }
+
+    // Haal bestaande zaken op om te tonen welke al geïmporteerd zijn
+    var allPaths = data.zaken.map(function(z){ return z.path; });
+    apiFetch('/zaken/by-folders', { method: 'POST', body: { paths: allPaths } }, function(err2, existing) {
+      var zakenMap = existing || {};
+      renderSubfolderCards(el, data, zakenMap, pad);
+    });
+  });
+}
+
+function renderSubfolderCards(el, data, zakenMap, pad) {
+  var h = '';
+
+  // Overzicht balk
+  var importedCount = 0;
+  data.zaken.forEach(function(z){ if (zakenMap[z.path]) importedCount++; });
+
+  h += '<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<div class="card" style="flex:1;min-width:140px;padding:14px;text-align:center">';
+  h += '<div style="font-size:28px;font-weight:800;color:var(--accent)">' + data.zaken_count + '</div>';
+  h += '<div style="font-size:12px;color:var(--tx3)">Zaken (submappen)</div></div>';
+  h += '<div class="card" style="flex:1;min-width:140px;padding:14px;text-align:center">';
+  h += '<div style="font-size:28px;font-weight:800;color:var(--green)">' + data.total_files + '</div>';
+  h += '<div style="font-size:12px;color:var(--tx3)">Documenten totaal</div></div>';
+  h += '<div class="card" style="flex:1;min-width:140px;padding:14px;text-align:center">';
+  h += '<div style="font-size:28px;font-weight:800;color:var(--purple)">' + fmtBytes(data.total_size) + '</div>';
+  h += '<div style="font-size:12px;color:var(--tx3)">Totale grootte</div></div>';
+  h += '</div>';
+
+  // Import alles knop (alleen als er nog niet-geïmporteerde zijn)
+  if (importedCount < data.zaken_count) {
+    h += '<div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">';
+    h += '<button class="btn btn-blue btn-sm" onclick="importAllZaken(\'' + esc(pad.replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + '\')"><span class="mi">download</span> Alle zaken importeren</button>';
+    h += '<span style="font-size:12px;color:var(--tx3)">' + (data.zaken_count - importedCount) + ' map' + ((data.zaken_count - importedCount) !== 1 ? 'pen' : '') + ' nog niet geïmporteerd</span>';
+    h += '</div>';
+  }
+
+  // Per submap een klikbare kaart
+  h += '<div class="card-grid">';
+  data.zaken.forEach(function(z) {
+    var escapedPath = z.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    var imported = zakenMap[z.path];
+
+    h += '<div class="card" style="cursor:pointer;position:relative;transition:border-color .2s'
+       + (imported ? ';border-color:var(--green)' : '') + '" '
+       + 'onclick="openZaakFolder(\'' + esc(escapedPath) + '\',\'' + esc(z.naam.replace(/'/g, "\\'")) + '\')" '
+       + 'onmouseenter="this.style.borderColor=\'var(--accent)\'" '
+       + 'onmouseleave="this.style.borderColor=\'' + (imported ? 'var(--green)' : 'var(--glass-bd)') + '\'">';
+
+    // Imported badge
+    if (imported) {
+      h += '<div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:3px;font-size:10px;color:var(--green)">';
+      h += '<span class="mi" style="font-size:14px">check_circle</span> in database';
+      if (imported.doc_count) h += ' · ' + imported.doc_count + ' docs';
+      h += '</div>';
+    }
+
+    h += '<div style="display:flex;align-items:start;gap:10px">';
+    h += '<span class="mi" style="font-size:28px;color:' + (imported ? 'var(--green)' : 'var(--yellow)') + '">folder</span>';
+    h += '<div style="flex:1;min-width:0">';
+    h += '<h3 style="font-size:15px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(z.naam) + '</h3>';
+    h += '<div style="font-size:12px;color:var(--tx3);display:flex;gap:10px;flex-wrap:wrap">';
+    h += '<span><span class="mi mi-sm">description</span> ' + z.file_count + ' documenten</span>';
+    h += '<span><span class="mi mi-sm">data_usage</span> ' + fmtBytes(z.total_size) + '</span>';
+    h += '</div>';
+
+    // Bestanden tonen
+    if (z.files && z.files.length) {
+      h += '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--glass-bd)">';
+      var maxShow = Math.min(z.files.length, 4);
+      for (var i = 0; i < maxShow; i++) {
+        var f = z.files[i];
+        var ext = (f.name.match(/\.[^.]+$/) || [''])[0].toLowerCase();
+        var ic = (ext === '.pdf') ? 'picture_as_pdf' : (ext === '.docx' || ext === '.doc') ? 'article' : (ext === '.png' || ext === '.jpg' || ext === '.jpeg') ? 'image' : 'description';
+        h += '<div style="font-size:11px;color:var(--tx2);padding:2px 0;display:flex;align-items:center;gap:4px;overflow:hidden"><span class="mi" style="font-size:14px;color:var(--tx3)">' + ic + '</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(f.name) + '</span></div>';
+      }
+      if (z.files.length > 4) {
+        h += '<div style="font-size:11px;color:var(--tx3);padding:2px 0">+ ' + (z.files.length - 4) + ' meer...</div>';
+      }
+      h += '</div>';
+    }
+
+    h += '</div></div>'; // flex
+    h += '</div>'; // card
+  });
+  h += '</div>';
+
+  el.innerHTML = h;
+}
+
+function openZaakFolder(pad, naam) {
+  // Klik op submap-kaart: importeer als zaak (of open bestaande) en navigeer
+  toast('Zaak openen...');
+  apiFetch('/import-single', { method: 'POST', body: { path: pad, naam: naam } }, function(err, data) {
+    if (err) { toast('Fout: ' + err); return; }
+    if (data.ok && data.zaak_id) {
+      if (data.created) {
+        toast('Zaak aangemaakt met ' + (data.docs || 0) + ' documenten');
+      } else if (data.synced > 0) {
+        toast(data.synced + ' nieuwe documenten gevonden');
+      }
+      go('/zaak/' + data.zaak_id);
+    } else {
+      toast('Kon zaak niet openen');
+    }
+  });
+}
+
+function importAllZaken(pad) {
+  if (!confirm('Wilt u alle submappen importeren als zaken?\n\nElke submap wordt een aparte zaak met alle documenten erin.\nBestaande zaken worden overgeslagen.')) return;
+
+  var btn = event.target.closest('.btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="width:14px;height:14px"></span> Importeren...'; }
+
+  apiFetch('/import-root', { method: 'POST', body: { path: pad } }, function(err, data) {
+    if (err) { toast('Fout: ' + err); if (btn) btn.disabled = false; return; }
+
+    if (data.ok) {
+      toast(data.created + ' zaken aangemaakt, ' + data.total_docs + ' documenten geimporteerd!');
+      // Herlaad dashboard
+      var el = document.getElementById('dashContent');
+      if (el) renderHoofdmap(el, pad);
+    } else {
+      toast('Import mislukt');
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
+function loadExistingZaken() {
+  // Nu geïntegreerd in scanRootFolder — toon losse zaken zonder hoofdmap-folder
+  apiFetch('/zaken', function(err, data) {
+    var el = document.getElementById('zakenSection');
+    if (!el) return;
+    if (err || !data || !data.length) return;
+
+    // Filter: alleen zaken tonen die GEEN folder_path hebben (losse zaken)
+    var losse = data.filter(function(z) { return !z.folder_path; });
+    if (!losse.length) return;
+
+    var h = '<div style="margin-top:24px">';
+    h += '<div class="cat-header"><span class="mi">gavel</span><h2>Losse zaken</h2><span>' + losse.length + '</span></div>';
+    h += '<div class="card-grid">';
+    h += losse.map(function(z) {
+      var badge = z.procedure_type ? '<span class="badge badge-blue">' + esc(z.procedure_type) + '</span> ' : '';
+      return '<div class="card" style="cursor:pointer" onclick="go(\'/zaak/' + z.id + '\')">' +
+        '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px">' +
+          '<div style="min-width:0;flex:1"><h3 style="font-size:15px;margin-bottom:4px">' + esc(z.naam) + '</h3>' +
+          '<div style="font-size:12px;color:var(--tx3)">' + badge + z.doc_count + ' documenten</div></div>' +
+          '<span class="mi" style="color:var(--tx3)">chevron_right</span></div></div>';
+    }).join('');
+    h += '</div></div>';
+    el.innerHTML = h;
+  });
+}
+
+function healthItem(icon, label, desc, color) {
+  return '<div class="health-item"><span class="mi" style="color:' + color + '">' + icon + '</span><div><div class="health-label">' + label + '</div><div class="health-desc">' + desc + '</div></div></div>';
+}
+
+// ---- NIEUWE ZAAK ----
+var _selectedFolder = '';
+
+function pgNieuweZaak() {
+  _selectedFolder = '';
+  var h = '<div class="section-title"><span class="mi">add_circle</span> Nieuwe zaak aanmaken</div>';
+
+  // Step 1: Folder kiezen
+  h += '<div class="card" style="max-width:700px;margin-bottom:16px">';
+  h += '<h3 style="font-size:15px;margin-bottom:4px"><span class="mi" style="color:var(--yellow)">folder_open</span> Stap 1 — Kies de map met uw documenten</h3>';
+  h += '<p style="font-size:12px;color:var(--tx3);margin-bottom:12px">Selecteer de map waar uw brieven, beschikkingen en andere documenten staan. Submappen worden ook gescand.</p>';
+  h += '<div style="display:flex;gap:8px;align-items:center">';
+  h += '<input class="form-input" id="nzFolder" placeholder="Klik op \'Bladeren\' om een map te kiezen..." style="flex:1" readonly>';
+  h += '<button class="btn btn-blue btn-sm" onclick="openFolderBrowser(null, null)"><span class="mi">folder_open</span> Bladeren</button>';
+  h += '</div>';
+  h += '<div id="scanPreview" style="margin-top:12px"></div>';
+  h += '</div>';
+
+  // Step 2: Zaak gegevens
+  h += '<div class="card" style="max-width:700px;margin-bottom:16px">';
+  h += '<h3 style="font-size:15px;margin-bottom:4px"><span class="mi" style="color:var(--accent)">edit_note</span> Stap 2 — Zaakgegevens</h3>';
+  h += '<p style="font-size:12px;color:var(--tx3);margin-bottom:12px">Geef uw zaak een naam en vul optioneel extra gegevens in.</p>';
+  h += '<div class="form-group"><label class="form-label">Naam van de zaak *</label><input class="form-input" id="nzNaam" placeholder="Bijv. Bezwaar WOZ-waarde 2024, Klacht Belastingdienst"></div>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+  h += '<div class="form-group"><label class="form-label">Wederpartij / Bestuursorgaan</label><input class="form-input" id="nzWederpartij" placeholder="Bijv. Gemeente Amsterdam"></div>';
+  h += '<div class="form-group"><label class="form-label">Organisatie / Instantie</label><input class="form-input" id="nzInstantie" placeholder="Bijv. Belastingdienst"></div>';
+  h += '</div>';
+  h += '<div class="form-group"><label class="form-label">Omschrijving</label><textarea class="form-input" id="nzOmschrijving" placeholder="Korte beschrijving van uw zaak..."></textarea></div>';
+  h += '</div>';
+
+  // Step 3: Aanmaken
+  h += '<div style="display:flex;gap:8px;max-width:700px">';
+  h += '<button class="btn btn-blue" onclick="createZaak()" style="flex:1;justify-content:center;padding:12px"><span class="mi">rocket_launch</span> Zaak aanmaken &amp; documenten importeren</button>';
+  h += '<button class="btn btn-ghost" onclick="go(\'/\')">Annuleren</button>';
+  h += '</div>';
+
+  return h;
+}
+
+// ---- FOLDER BROWSER MODAL ----
+var _fbCallback = null;
+
+function openFolderBrowser(startPath, callback) {
+  _fbCallback = callback || null;
+
+  var modal = document.createElement('div');
+  modal.className = 'fb-modal';
+  modal.id = 'fbModal';
+  modal.innerHTML = '<div class="fb-box">' +
+    '<div class="fb-header"><span class="mi" style="color:var(--yellow)">folder_open</span><h3>Map kiezen</h3>' +
+    '<button class="btn btn-ghost btn-sm" onclick="closeFolderBrowser()" style="margin-left:auto"><span class="mi">close</span></button></div>' +
+    '<div class="fb-path" id="fbPath">Laden...</div>' +
+    '<div class="fb-body" id="fbBody"><div class="loading"><div class="spinner"></div></div></div>' +
+    '<div class="fb-footer">' +
+      '<span class="mi" style="color:var(--yellow);font-size:18px">folder</span>' +
+      '<span class="fb-selected-path" id="fbSelectedPath">Geen map geselecteerd</span>' +
+      '<button class="btn btn-ghost btn-sm" id="fbSelectBtn" onclick="selectBrowsedFolder()" disabled><span class="mi">check</span> Selecteer deze map</button>' +
+    '</div>' +
+  '</div>';
+
+  document.body.appendChild(modal);
+
+  // Close on backdrop click
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeFolderBrowser();
+  });
+
+  // Load start
+  browseTo(startPath || '');
+}
+
+function closeFolderBrowser() {
+  var m = document.getElementById('fbModal');
+  if (m) m.remove();
+}
+
+var _fbCurrentPath = '';
+
+function browseTo(path) {
+  _fbCurrentPath = path;
+  var body = document.getElementById('fbBody');
+  if (body) body.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  apiFetch('/browse?path=' + encodeURIComponent(path), function(err, data) {
+    var body = document.getElementById('fbBody');
+    var pathEl = document.getElementById('fbPath');
+    if (!body) return;
+
+    if (err) { body.innerHTML = '<div style="padding:20px;color:var(--red);font-size:13px">' + esc(err) + '</div>'; return; }
+
+    // Update path breadcrumbs
+    if (pathEl) {
+      if (data.shortcuts) {
+        pathEl.innerHTML = '<span class="mi mi-sm">home</span> Snelkoppelingen';
+      } else {
+        var bc = '<span class="fb-path-seg" onclick="browseTo(\'\')"><span class="mi mi-sm">home</span></span>';
+        if (data.path) {
+          var sep = data.path.indexOf('\\') !== -1 ? '\\' : '/';
+          var parts = data.path.split(sep);
+          var built = '';
+          parts.forEach(function(p, i) {
+            if (!p) return;
+            built += (i === 0 && sep === '\\' ? p : (built ? sep : '') + p);
+            if (i === 0 && sep === '\\' && !built.endsWith('\\')) built += '\\';
+            bc += ' <span style="color:var(--tx3)">' + sep + '</span> ';
+            bc += '<span class="fb-path-seg" onclick="browseTo(\'' + esc(built.replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + '\')">' + esc(p) + '</span>';
+          });
+        }
+        pathEl.innerHTML = bc;
+      }
+    }
+
+    // Update select button
+    updateFbSelect(data.path);
+
+    // Render items
+    if (!data.items || data.items.length === 0) {
+      body.innerHTML = '<div style="padding:30px;text-align:center;color:var(--tx3);font-size:13px"><span class="mi" style="display:block;font-size:32px;margin-bottom:8px;opacity:.4">folder_off</span>Lege map</div>';
+      return;
+    }
+
+    var h = '';
+
+    // Back button
+    if (data.parent !== undefined && data.path) {
+      h += '<div class="fb-item" onclick="browseTo(\'' + esc((data.parent || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + '\')">';
+      h += '<span class="mi" style="color:var(--tx3)">arrow_back</span>';
+      h += '<div class="fb-item-info"><span class="fb-item-name">..</span><span class="fb-item-meta">Bovenliggende map</span></div>';
+      h += '</div>';
+    }
+
+    data.items.forEach(function(item) {
+      var cls = 'fb-item';
+      if (item.type === 'folder') cls += ' folder';
+      else if (item.type === 'drive') cls += ' drive';
+      else if (item.type === 'shortcut') cls += ' shortcut';
+      else if (item.type === 'file') cls += ' file' + (item.supported ? ' supported' : '');
+
+      var icon = 'insert_drive_file';
+      if (item.type === 'folder') icon = 'folder';
+      else if (item.type === 'drive') icon = 'hard_drive';
+      else if (item.type === 'shortcut') icon = 'bookmark';
+      else if (item.supported) icon = 'description';
+
+      var escapedPath = esc(item.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+
+      if (item.type === 'folder' || item.type === 'drive' || item.type === 'shortcut') {
+        h += '<div class="' + cls + '" onclick="browseTo(\'' + escapedPath + '\')">';
+      } else {
+        h += '<div class="' + cls + '">';
+      }
+      h += '<span class="mi">' + icon + '</span>';
+      h += '<div class="fb-item-info"><span class="fb-item-name">' + esc(item.name) + '</span>';
+      if (item.type === 'folder') {
+        h += '<span class="fb-item-meta">' + (item.items_count || 0) + ' items</span>';
+      } else if (item.type === 'file') {
+        h += '<span class="fb-item-meta">' + esc(item.ext || '') + ' &middot; ' + fmtBytes(item.size) + (item.supported ? ' &middot; <span style="color:var(--green)">ondersteund</span>' : '') + '</span>';
+      }
+      h += '</div>';
+      h += '</div>';
+    });
+
+    body.innerHTML = h;
+  });
+}
+
+function updateFbSelect(path) {
+  var selPath = document.getElementById('fbSelectedPath');
+  var selBtn = document.getElementById('fbSelectBtn');
+  if (selPath) selPath.textContent = path || 'Geen map geselecteerd';
+  if (selBtn) selBtn.disabled = !path;
+}
+
+function selectBrowsedFolder() {
+  _selectedFolder = _fbCurrentPath;
+  closeFolderBrowser();
+  toast('Map geselecteerd: ' + _selectedFolder);
+
+  // Als er een callback is (bijv. dashboard hoofdmap), gebruik die
+  if (_fbCallback) {
+    _fbCallback();
+    _fbCallback = null;
+  } else {
+    // Default: nieuwe zaak flow
+    var input = document.getElementById('nzFolder');
+    if (input) input.value = _selectedFolder;
+    scanSelectedFolder();
+  }
+}
+
+function scanSelectedFolder() {
+  var el = document.getElementById('scanPreview');
+  if (!el || !_selectedFolder) return;
+
+  el.innerHTML = '<div style="padding:12px;text-align:center"><span class="spinner"></span> Map scannen op documenten...</div>';
+
+  apiFetch('/browse/scan', { method: 'POST', body: { path: _selectedFolder } }, function(err, data) {
+    if (!el) return;
+    if (err) { el.innerHTML = '<div style="color:var(--red);font-size:12px">' + esc(err) + '</div>'; return; }
+
+    if (data.total_files === 0) {
+      el.innerHTML = '<div class="scan-preview"><div class="scan-header"><span class="mi" style="color:var(--tx3)">info</span><span style="font-size:13px;color:var(--tx3)">Geen ondersteunde documenten gevonden in deze map.</span></div></div>';
+      return;
+    }
+
+    var h = '<div class="scan-preview">';
+    h += '<div class="scan-header"><span class="mi">description</span><span style="font-size:14px;font-weight:600">' + data.total_files + ' documenten gevonden</span></div>';
+    h += '<div class="scan-stats">';
+    h += '<span class="scan-stat"><span class="mi">folder</span> ' + Object.keys(data.by_subfolder).length + ' mappen</span>';
+    h += '<span class="scan-stat"><span class="mi">insert_drive_file</span> ' + data.total_files + ' bestanden</span>';
+    h += '<span class="scan-stat"><span class="mi">data_usage</span> ' + fmtBytes(data.total_size) + '</span>';
+    h += '</div>';
+
+    // Per subfolder
+    var subs = data.by_subfolder;
+    Object.keys(subs).forEach(function(sub) {
+      var info = subs[sub];
+      h += '<div class="scan-subfolder">';
+      h += '<div class="scan-subfolder-head" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">';
+      h += '<span class="mi">folder</span> ' + esc(sub) + ' <span class="count">(' + info.count + ' bestanden)</span>';
+      h += '</div>';
+      h += '<div style="display:none">';
+      info.files.forEach(function(f) {
+        h += '<div class="scan-file"><span class="mi">description</span> ' + esc(f.name) + ' <span style="color:var(--tx3)">' + fmtBytes(f.size) + '</span></div>';
+      });
+      h += '</div>';
+      h += '</div>';
+    });
+
+    h += '</div>';
+
+    // Auto-fill zaak naam from folder name if empty
+    var nameInput = document.getElementById('nzNaam');
+    if (nameInput && !nameInput.value) {
+      var parts = _selectedFolder.replace(/\\/g, '/').split('/');
+      var folderName = parts[parts.length - 1] || parts[parts.length - 2] || '';
+      if (folderName) nameInput.value = folderName;
+    }
+
+    el.innerHTML = h;
+  });
+}
+
+function createZaak() {
+  var naam = document.getElementById('nzNaam').value.trim();
+  if (!naam) { toast('Vul een naam in voor de zaak'); return; }
+
+  var folder = _selectedFolder || document.getElementById('nzFolder').value.trim();
+  if (!folder) {
+    if (!confirm('U heeft geen map geselecteerd. Wilt u toch doorgaan zonder documenten?')) return;
+  }
+
+  apiFetch('/zaken', {
+    method: 'POST',
+    body: {
+      naam: naam,
+      wederpartij: document.getElementById('nzWederpartij').value.trim(),
+      instantie: document.getElementById('nzInstantie').value.trim(),
+      omschrijving: document.getElementById('nzOmschrijving').value.trim(),
+      folder_path: folder,
+    }
+  }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    var docCount = (data.documenten || []).length;
+    toast('Zaak aangemaakt! ' + (docCount ? docCount + ' documenten geimporteerd.' : ''));
+    go('/zaak/' + data.id);
+  });
+}
+
+// ---- ZAAK DETAIL ----
+function pgZaak(id) {
+  var app = document.getElementById('app');
+  app.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  apiFetch('/zaken/' + id, function(err, zaak, ok) {
+    if (err || !ok) { app.innerHTML = '<div class="empty-state">Zaak niet gevonden</div>'; return; }
+    renderZaak(zaak);
+  });
+}
+
+function renderZaak(z) {
+  var app = document.getElementById('app');
+  var badge = z.procedure_type ? '<span class="badge badge-blue" style="font-size:12px">' + esc(z.procedure_type) + '</span> ' : '';
+
+  var h = '<div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:12px;margin-bottom:16px">';
+  h += '<div><h1 style="font-size:22px;font-weight:800">' + esc(z.naam) + '</h1>';
+  h += '<div style="font-size:13px;color:var(--tx2);margin-top:4px">' + badge;
+  if (z.wederpartij) h += 'vs. ' + esc(z.wederpartij) + ' &middot; ';
+  if (z.instantie) h += esc(z.instantie) + ' &middot; ';
+  h += fmtDate(z.created_at) + '</div></div>';
+  h += '<div style="display:flex;gap:6px">';
+  h += '<button class="btn btn-ghost btn-sm" onclick="scanFolder(\'' + z.id + '\')"><span class="mi">refresh</span> Scan map</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="deleteZaak(\'' + z.id + '\')"><span class="mi">delete</span></button>';
+  h += '</div></div>';
+
+  if (z.deadline) {
+    var dl = new Date(z.deadline), now = new Date(), days = Math.ceil((dl - now) / 86400000);
+    var dcolor = days <= 7 ? 'var(--red)' : days <= 14 ? 'var(--yellow)' : 'var(--green)';
+    h += '<div class="card" style="margin-bottom:16px;border-color:' + dcolor + ';padding:12px 16px;display:flex;align-items:center;gap:8px">';
+    h += '<span class="mi" style="color:' + dcolor + '">schedule</span>';
+    h += '<span style="font-size:14px;font-weight:600;color:' + dcolor + '">Deadline: ' + fmtDate(z.deadline) + ' (' + days + ' dagen resterend)</span>';
+    h += '</div>';
+  }
+
+  // Samenvatting card
+  h += renderSamenvattingCard(z);
+
+  // Tabs
+  h += '<div class="tabs" id="zaakTabs">';
+  h += '<button class="tab active" data-tab="docs" onclick="switchTab(this,\'' + z.id + '\')"><span class="mi">description</span> Documenten (' + (z.documenten||[]).length + ')</button>';
+  h += '<button class="tab" data-tab="anon" onclick="switchTab(this,\'' + z.id + '\')"><span class="mi">security</span> Anonimisering</button>';
+  h += '<button class="tab" data-tab="analyse" onclick="switchTab(this,\'' + z.id + '\')"><span class="mi">psychology</span> Analyse</button>';
+  h += '<button class="tab" data-tab="tijdlijn" onclick="switchTab(this,\'' + z.id + '\')"><span class="mi">timeline</span> Tijdlijn</button>';
+  h += '<button class="tab" data-tab="meldpunt" onclick="switchTab(this,\'' + z.id + '\')"><span class="mi">flag</span> Meldpunt</button>';
+  h += '</div>';
+  h += '<div id="tabContent"></div>';
+
+  app.innerHTML = h;
+  renderDocsTab(z);
+}
+
+// ---- SAMENVATTING ----
+function renderSamenvattingCard(z) {
+  var h = '';
+  var hasAnon = (z.documenten || []).some(function(d) { return d.has_anonymized; });
+  var isStale = z.samenvatting && z.doc_count !== z.samenvatting_doc_count;
+
+  if (z.samenvatting) {
+    h += '<div class="samenvatting-card' + (isStale ? ' samenvatting-stale' : '') + '" id="samenvattingCard">';
+    h += '<h3><span class="mi" style="color:var(--accent)">article</span> Samenvatting';
+    if (isStale) {
+      h += ' <span class="badge" style="background:rgba(234,179,8,.15);color:#eab308;font-size:11px"><span class="mi" style="font-size:12px">warning</span> Verouderd — documenten gewijzigd</span>';
+    }
+    h += '</h3>';
+    h += '<div class="samenvatting-body" id="samenvattingBody">' + esc(z.samenvatting) + '</div>';
+    h += '<div class="samenvatting-meta">Bijgewerkt: ' + fmtDateTime(z.samenvatting_updated_at) + ' &middot; ' + z.samenvatting_doc_count + ' documenten verwerkt</div>';
+    h += '<div class="samenvatting-actions">';
+    h += '<button class="btn btn-ghost btn-sm" onclick="editSamenvatting(\'' + z.id + '\')"><span class="mi">edit</span> Bewerken</button>';
+    h += '<button class="btn btn-ghost btn-sm" onclick="generateSamenvatting(\'' + z.id + '\')"><span class="mi">refresh</span> Opnieuw genereren</button>';
+    h += '</div></div>';
+  } else if (hasAnon) {
+    h += '<div class="samenvatting-card" id="samenvattingCard" style="border-style:dashed">';
+    h += '<h3><span class="mi" style="color:var(--tx3)">article</span> Samenvatting</h3>';
+    h += '<p style="color:var(--tx3);font-size:14px">Er is nog geen samenvatting. Genereer een AI-samenvatting van alle geanonimiseerde documenten.</p>';
+    h += '<div class="samenvatting-actions">';
+    h += '<button class="btn btn-blue btn-sm" onclick="generateSamenvatting(\'' + z.id + '\')"><span class="mi">auto_awesome</span> Genereer samenvatting</button>';
+    h += '</div></div>';
+  } else if ((z.documenten || []).length > 0) {
+    h += '<div class="samenvatting-card" id="samenvattingCard" style="border-style:dashed;border-color:var(--tx3)">';
+    h += '<h3><span class="mi" style="color:var(--tx3)">article</span> Samenvatting</h3>';
+    h += '<p style="color:var(--tx3);font-size:14px">Anonimiseer eerst de documenten via de Anonimisering tab, daarna kan een samenvatting gegenereerd worden.</p>';
+    h += '</div>';
+  }
+  return h;
+}
+
+function generateSamenvatting(zaakId) {
+  toast('Samenvatting genereren...');
+  var card = document.getElementById('samenvattingCard');
+  if (card) card.innerHTML = '<div class="loading"><div class="spinner"></div> Samenvatting genereren... Dit kan even duren.</div>';
+  apiFetch('/zaken/' + zaakId + '/samenvatting', { method: 'POST', body: {} }, function(err, data, ok) {
+    if (err || !ok) {
+      toast('Fout: ' + (err || data.error));
+      if (card) card.innerHTML = '<div style="color:var(--red)">' + esc(err || data.error) + '</div>';
+      return;
+    }
+    toast('Samenvatting gegenereerd!');
+    pgZaak(zaakId);
+  });
+}
+
+function editSamenvatting(zaakId) {
+  var body = document.getElementById('samenvattingBody');
+  var card = document.getElementById('samenvattingCard');
+  if (!body || !card) return;
+  var currentText = body.textContent;
+  var h = '<h3><span class="mi" style="color:var(--accent)">edit</span> Samenvatting bewerken</h3>';
+  h += '<textarea id="samenvattingEdit" style="width:100%;min-height:200px;font-size:14px;line-height:1.7;padding:12px;border:1px solid var(--glass-bd);border-radius:8px;background:var(--bg2);color:var(--tx1);font-family:inherit;resize:vertical">' + esc(currentText) + '</textarea>';
+  h += '<div class="samenvatting-actions">';
+  h += '<button class="btn btn-blue btn-sm" onclick="saveSamenvatting(\'' + zaakId + '\')"><span class="mi">save</span> Opslaan</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="pgZaak(\'' + zaakId + '\')"><span class="mi">close</span> Annuleren</button>';
+  h += '</div>';
+  card.innerHTML = h;
+}
+
+function saveSamenvatting(zaakId) {
+  var ta = document.getElementById('samenvattingEdit');
+  if (!ta) return;
+  var tekst = ta.value.trim();
+  if (!tekst) { toast('Samenvatting mag niet leeg zijn.'); return; }
+  toast('Samenvatting opslaan...');
+  apiFetch('/zaken/' + zaakId + '/samenvatting', { method: 'PUT', body: { samenvatting: tekst } }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast('Samenvatting opgeslagen!');
+    pgZaak(zaakId);
+  });
+}
+
+function switchTab(btn, zaakId) {
+  document.querySelectorAll('#zaakTabs .tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  var tab = btn.dataset.tab;
+  if (tab === 'docs') apiFetch('/zaken/' + zaakId, function(e,z){ if(!e) renderDocsTab(z); });
+  else if (tab === 'anon') renderAnonTab(zaakId);
+  else if (tab === 'analyse') renderAnalyseTab(zaakId);
+  else if (tab === 'tijdlijn') renderTimelineTab(zaakId);
+  else if (tab === 'meldpunt') renderMeldpuntTab(zaakId);
+}
+
+// ---- DOCS TAB ----
+var DOC_TYPES = [
+  {v:'', l:'—'},
+  {v:'brief', l:'Brief'},
+  {v:'email', l:'E-mail'},
+  {v:'beschikking', l:'Beschikking'},
+  {v:'bezwaarschrift', l:'Bezwaarschrift'},
+  {v:'beroepschrift', l:'Beroepschrift'},
+  {v:'klacht', l:'Klacht'},
+  {v:'dagvaarding', l:'Dagvaarding'},
+  {v:'uitspraak', l:'Uitspraak / Vonnis'},
+  {v:'verzoek', l:'Verzoek / Aanvraag'},
+  {v:'factuur', l:'Factuur / Nota'},
+  {v:'rapport', l:'Rapport / Verslag'},
+  {v:'formulier', l:'Formulier'},
+  {v:'contract', l:'Contract'},
+  {v:'scan', l:'Scan / Kopie'},
+  {v:'foto', l:'Foto / Screenshot'},
+  {v:'aangifte', l:'Aangifte'},
+  {v:'woo', l:'WOO-verzoek'},
+  {v:'bijlage', l:'Bijlage / Bewijs'},
+  {v:'tekst', l:'Tekstbestand'},
+  {v:'overig', l:'Overig'},
+];
+
+var DOC_RICHTINGEN = [
+  {v:'', l:'—'},
+  {v:'inkomend', l:'Inkomend (ontvangen)'},
+  {v:'uitgaand', l:'Uitgaand (verstuurd)'},
+  {v:'intern', l:'Intern'},
+];
+
+function renderDocsTab(z) {
+  var tc = document.getElementById('tabContent');
+  if (!tc) return;
+  var docs = z.documenten || [];
+  var h = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<button class="btn btn-blue btn-sm" onclick="extractAll(\'' + z.id + '\')"><span class="mi">text_snippet</span> Alles extraheren</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="addDocsByPath(\'' + z.id + '\')"><span class="mi">add</span> Bestanden toevoegen</button>';
+  h += '</div>';
+
+  if (!docs.length) {
+    h += '<div class="empty-state"><span class="mi">folder_open</span><p>Geen documenten. Voeg bestanden toe of stel een map in.</p></div>';
+  } else {
+    docs.forEach(function(d) {
+      h += renderDocCard(d, z.id);
+    });
+  }
+  tc.innerHTML = h;
+}
+
+function renderDocCard(d, zaakId) {
+  var typeIcon = {
+    'brief':'mail','email':'email','beschikking':'assignment','bezwaarschrift':'edit_document',
+    'beroepschrift':'account_balance','klacht':'record_voice_over','dagvaarding':'description',
+    'uitspraak':'gavel','verzoek':'request_page','factuur':'receipt','rapport':'summarize',
+    'formulier':'list_alt','contract':'handshake','scan':'scanner','foto':'image',
+    'aangifte':'report','woo':'visibility','bijlage':'attach_file','tekst':'article','overig':'insert_drive_file'
+  };
+  var icon = typeIcon[d.doc_type] || 'insert_drive_file';
+  var richtingIcon = {inkomend:'call_received', uitgaand:'call_made', intern:'swap_horiz'};
+  var richtingColor = {inkomend:'var(--green)', uitgaand:'var(--accent)', intern:'var(--tx3)'};
+
+  var h = '<div class="card" style="margin-bottom:10px;padding:14px 18px">';
+
+  // Top row: icon + naam + badges + acties
+  h += '<div style="display:flex;align-items:start;gap:10px;margin-bottom:8px">';
+  h += '<span class="mi" style="font-size:22px;color:var(--accent);margin-top:2px">' + icon + '</span>';
+  h += '<div style="flex:1;min-width:0">';
+  h += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
+  h += '<a href="#/document/' + d.id + '" style="font-weight:600;font-size:14px">' + esc(d.bestandsnaam) + '</a>';
+  if (d.doc_type) h += '<span class="badge badge-blue">' + esc(d.doc_type) + '</span>';
+  if (d.doc_richting) h += '<span class="badge" style="background:rgba(148,163,184,.1);color:var(--tx2)"><span class="mi" style="font-size:12px;vertical-align:-2px;color:' + (richtingColor[d.doc_richting]||'var(--tx3)') + '">' + (richtingIcon[d.doc_richting]||'') + '</span> ' + esc(d.doc_richting) + '</span>';
+  h += '</div>';
+
+  // Meta line — compact single-line with middot separators
+  var metaParts = [];
+  metaParts.push(esc(d.bestandstype) + ' · ' + fmtBytes(d.bestandsgrootte));
+  if (d.doc_datum) metaParts.push('<span class="mi" style="font-size:12px;vertical-align:-2px">event</span> ' + esc(d.doc_datum));
+  if (d.doc_afzender) metaParts.push('Van: ' + esc(d.doc_afzender));
+  if (d.doc_ontvanger) metaParts.push('Aan: ' + esc(d.doc_ontvanger));
+  if (d.doc_kenmerk) metaParts.push(esc(d.doc_kenmerk));
+  if (d.file_modified) metaParts.push('<span class="mi" style="font-size:12px;vertical-align:-2px">edit_calendar</span> ' + esc(d.file_modified));
+  metaParts.push(d.extraction_done ? '<span style="color:var(--green)">✓ tekst</span>' : 'geen tekst');
+  if (d.has_anonymized) metaParts.push('<span style="color:var(--green)"><span class="mi" style="font-size:12px;vertical-align:-2px">security</span> geanonimiseerd</span>');
+  if (d.has_samenvatting) metaParts.push('<span style="color:var(--green)"><span class="mi" style="font-size:12px;vertical-align:-2px">check_circle</span> samenvatting' + (d.samenvatting_at ? ' · ' + fmtDateTime(d.samenvatting_at) : '') + '</span>');
+  h += '<div style="font-size:11px;color:var(--tx3);margin-top:3px;line-height:1.6">' + metaParts.join(' &nbsp;·&nbsp; ') + '</div>';
+
+  if (d.doc_onderwerp) {
+    h += '<div style="font-size:12px;color:var(--tx2);margin-top:4px">' + esc(d.doc_onderwerp) + '</div>';
+  }
+  if (d.doc_notities) {
+    h += '<div style="font-size:11px;color:var(--tx3);margin-top:2px;font-style:italic">' + esc(d.doc_notities) + '</div>';
+  }
+
+  h += '</div>'; // flex:1
+
+  // Action buttons
+  h += '<div style="display:flex;gap:4px;flex-shrink:0">';
+  h += '<button class="btn btn-ghost btn-sm" onclick="event.preventDefault();toggleMetaEdit(\'' + d.id + '\',\'' + zaakId + '\')" title="Metadata bewerken"><span class="mi">edit</span></button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="event.preventDefault();extractDoc(\'' + d.id + '\',\'' + zaakId + '\')" title="Tekst extraheren"><span class="mi">text_snippet</span></button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="event.preventDefault();go(\'/anonimiseer/' + d.id + '\')" title="Anonimiseren"><span class="mi">security</span></button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="event.preventDefault();generateDocSamenvatting(\'' + d.id + '\',\'' + zaakId + '\')" title="Samenvatten"><span class="mi">auto_awesome</span></button>';
+  h += '</div>';
+  h += '</div>'; // top row
+
+  // Samenvatting panel (zichtbaar als er een samenvatting is)
+  if (d.has_samenvatting) {
+    h += '<div id="docSamenvatting_' + d.id + '" style="border-top:1px solid var(--glass-bd);padding-top:10px;margin-top:8px">';
+    h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">';
+    h += '<span class="mi" style="font-size:16px;color:var(--green)">check_circle</span>';
+    h += '<span style="font-size:12px;font-weight:600;color:var(--tx2)">Samenvatting</span>';
+    if (d.samenvatting_at) h += '<span style="font-size:11px;color:var(--tx3)">' + fmtDateTime(d.samenvatting_at) + '</span>';
+    h += '<span style="flex:1"></span>';
+    h += '<button class="btn btn-ghost btn-sm" style="padding:2px 6px" onclick="event.preventDefault();toggleDocSamenvatting(\'' + d.id + '\')" title="In-/uitklappen"><span class="mi" id="docSamToggle_' + d.id + '">expand_less</span></button>';
+    h += '<button class="btn btn-ghost btn-sm" style="padding:2px 6px" onclick="event.preventDefault();generateDocSamenvatting(\'' + d.id + '\',\'' + zaakId + '\')" title="Opnieuw genereren"><span class="mi" style="font-size:16px">refresh</span></button>';
+    h += '</div>';
+    h += '<div id="docSamBody_' + d.id + '" style="font-size:13px;color:var(--tx2);line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto;padding:8px 10px;background:var(--bg2);border-radius:var(--rs)">' + esc(d.samenvatting) + '</div>';
+    h += '</div>';
+  }
+
+  // Samenvatting loading placeholder
+  h += '<div id="docSamLoading_' + d.id + '" style="display:none;border-top:1px solid var(--glass-bd);padding:12px 0;margin-top:8px;text-align:center">';
+  h += '<div class="spinner" style="margin-right:8px;vertical-align:-4px"></div> <span style="font-size:13px;color:var(--tx3)">Samenvatting genereren...</span>';
+  h += '</div>';
+
+  // Editable metadata form (hidden by default)
+  h += '<div id="metaEdit_' + d.id + '" style="display:none;border-top:1px solid var(--glass-bd);padding-top:12px;margin-top:4px">';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">';
+
+  // Type
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Type document</label>';
+  h += '<select class="form-input" id="meta_type_' + d.id + '" style="padding:6px 10px;font-size:12px">';
+  DOC_TYPES.forEach(function(t){ h += '<option value="' + t.v + '"' + (d.doc_type===t.v?' selected':'') + '>' + t.l + '</option>'; });
+  h += '</select></div>';
+
+  // Datum
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Datum document</label>';
+  h += '<input class="form-input" id="meta_datum_' + d.id + '" value="' + esc(d.doc_datum) + '" type="date" style="padding:6px 10px;font-size:12px"></div>';
+
+  // Richting
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Richting</label>';
+  h += '<select class="form-input" id="meta_richting_' + d.id + '" style="padding:6px 10px;font-size:12px">';
+  DOC_RICHTINGEN.forEach(function(r){ h += '<option value="' + r.v + '"' + (d.doc_richting===r.v?' selected':'') + '>' + r.l + '</option>'; });
+  h += '</select></div>';
+
+  h += '</div>'; // grid row 1
+
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+
+  // Afzender
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Afzender (van)</label>';
+  h += '<input class="form-input" id="meta_afzender_' + d.id + '" value="' + esc(d.doc_afzender) + '" placeholder="Bijv. Gemeente, Belastingdienst" style="padding:6px 10px;font-size:12px"></div>';
+
+  // Ontvanger
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Ontvanger (aan)</label>';
+  h += '<input class="form-input" id="meta_ontvanger_' + d.id + '" value="' + esc(d.doc_ontvanger) + '" placeholder="Bijv. uw naam" style="padding:6px 10px;font-size:12px"></div>';
+
+  h += '</div>'; // grid row 2
+
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+
+  // Kenmerk
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Kenmerk / Referentie</label>';
+  h += '<input class="form-input" id="meta_kenmerk_' + d.id + '" value="' + esc(d.doc_kenmerk) + '" placeholder="Referentienummer" style="padding:6px 10px;font-size:12px"></div>';
+
+  // Onderwerp
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Onderwerp</label>';
+  h += '<input class="form-input" id="meta_onderwerp_' + d.id + '" value="' + esc(d.doc_onderwerp) + '" placeholder="Kort onderwerp" style="padding:6px 10px;font-size:12px"></div>';
+
+  h += '</div>'; // grid row 3
+
+  // Notities
+  h += '<div class="form-group" style="margin-bottom:8px"><label class="form-label" style="font-size:11px">Notities</label>';
+  h += '<input class="form-input" id="meta_notities_' + d.id + '" value="' + esc(d.doc_notities) + '" placeholder="Eigen aantekeningen..." style="padding:6px 10px;font-size:12px"></div>';
+
+  // Save/cancel
+  h += '<div style="display:flex;gap:6px;margin-top:4px">';
+  h += '<button class="btn btn-blue btn-sm" onclick="saveDocMeta(\'' + d.id + '\',\'' + zaakId + '\')"><span class="mi">save</span> Opslaan</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="toggleMetaEdit(\'' + d.id + '\')">Annuleren</button>';
+  h += '</div>';
+
+  h += '</div>'; // metaEdit
+  h += '</div>'; // card
+  return h;
+}
+
+function toggleMetaEdit(docId) {
+  var el = document.getElementById('metaEdit_' + docId);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveDocMeta(docId, zaakId) {
+  var body = {
+    doc_type: document.getElementById('meta_type_' + docId).value,
+    doc_datum: document.getElementById('meta_datum_' + docId).value,
+    doc_richting: document.getElementById('meta_richting_' + docId).value,
+    doc_afzender: document.getElementById('meta_afzender_' + docId).value,
+    doc_ontvanger: document.getElementById('meta_ontvanger_' + docId).value,
+    doc_kenmerk: document.getElementById('meta_kenmerk_' + docId).value,
+    doc_onderwerp: document.getElementById('meta_onderwerp_' + docId).value,
+    doc_notities: document.getElementById('meta_notities_' + docId).value,
+  };
+  apiFetch('/documenten/' + docId + '/metadata', { method: 'PUT', body: body }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout bij opslaan'); return; }
+    toast('Metadata opgeslagen!');
+    // Herlaad zaak om documenten opnieuw te renderen
+    apiFetch('/zaken/' + zaakId, function(e,z){ if(!e) renderDocsTab(z); });
+  });
+}
+
+function extractDoc(docId, zaakId) {
+  toast('Tekst extraheren...');
+  apiFetch('/documenten/' + docId + '/extract', { method: 'POST' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast('Geextraheerd: ' + data.text_length + ' tekens (' + data.method + ')');
+    apiFetch('/zaken/' + zaakId, function(e,z){ if(!e) renderDocsTab(z); });
+  });
+}
+
+function extractAll(zaakId) {
+  toast('Alle documenten extraheren...');
+  apiFetch('/zaken/' + zaakId + '/extract-all', { method: 'POST' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    var done = data.results.filter(function(r){ return r.status === 'ok'; }).length;
+    toast(done + ' documenten geextraheerd');
+    apiFetch('/zaken/' + zaakId, function(e,z){ if(!e) renderDocsTab(z); });
+  });
+}
+
+function generateDocSamenvatting(docId, zaakId) {
+  var loading = document.getElementById('docSamLoading_' + docId);
+  if (loading) {
+    loading.style.display = '';
+    loading.innerHTML = '<div style="text-align:left;padding:8px 10px;font-size:13px;color:var(--tx2)">' +
+      '<div id="step_ext_' + docId + '" style="margin-bottom:4px"><span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:-2px"></span> Tekst extraheren...</div>' +
+      '<div id="step_anon_' + docId + '" style="margin-bottom:4px;opacity:.4"><span class="mi" style="font-size:14px;vertical-align:-2px;color:var(--tx3)">hourglass_empty</span> Anonimiseren</div>' +
+      '<div id="step_sam_' + docId + '" style="opacity:.4"><span class="mi" style="font-size:14px;vertical-align:-2px;color:var(--tx3)">hourglass_empty</span> Samenvatten met AI</div>' +
+      '</div>';
+  }
+  toast('Pipeline gestart: extraheren → anonimiseren → samenvatten');
+
+  // Animeer stappen
+  setTimeout(function() {
+    var s1 = document.getElementById('step_ext_' + docId);
+    if (s1) s1.innerHTML = '<span class="mi" style="font-size:14px;vertical-align:-2px;color:var(--green)">check_circle</span> Tekst extraheren';
+    var s2 = document.getElementById('step_anon_' + docId);
+    if (s2) { s2.style.opacity = '1'; s2.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:-2px"></span> Anonimiseren...'; }
+  }, 2000);
+  setTimeout(function() {
+    var s2 = document.getElementById('step_anon_' + docId);
+    if (s2) s2.innerHTML = '<span class="mi" style="font-size:14px;vertical-align:-2px;color:var(--green)">check_circle</span> Anonimiseren';
+    var s3 = document.getElementById('step_sam_' + docId);
+    if (s3) { s3.style.opacity = '1'; s3.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:-2px"></span> Samenvatten met AI... (kan even duren)'; }
+  }, 4000);
+
+  apiFetch('/documenten/' + docId + '/samenvatting', { method: 'POST', body: {} }, function(err, data, ok) {
+    if (loading) loading.style.display = 'none';
+    if (err || !ok) {
+      var errMsg = err || (data && data.error) || 'Onbekende fout';
+      toast('Fout: ' + errMsg);
+      if (loading) {
+        loading.style.display = '';
+        loading.innerHTML = '<div style="padding:8px 10px;font-size:13px;color:var(--red)"><span class="mi" style="font-size:14px;vertical-align:-2px">error</span> ' + esc(errMsg) + '</div>';
+      }
+      // Toon welke stappen wel gelukt zijn
+      if (data && data.steps) {
+        var stepsHtml = '';
+        data.steps.forEach(function(s) {
+          var icon = s.status === 'ok' ? '<span class="mi" style="font-size:14px;vertical-align:-2px;color:var(--green)">check_circle</span>' :
+                     s.status === 'al_gedaan' ? '<span class="mi" style="font-size:14px;vertical-align:-2px;color:var(--tx3)">check</span>' :
+                     '<span class="mi" style="font-size:14px;vertical-align:-2px;color:var(--yellow)">warning</span>';
+          stepsHtml += '<div style="margin-bottom:2px">' + icon + ' ' + esc(s.step) + ': ' + esc(s.detail) + '</div>';
+        });
+        if (loading) loading.innerHTML += '<div style="padding:4px 10px;font-size:12px;color:var(--tx3)">' + stepsHtml + '</div>';
+      }
+      // Herlaad toch om extractie/anonimisering status te tonen
+      apiFetch('/zaken/' + zaakId, function(e,z){ if(!e) renderDocsTab(z); });
+      return;
+    }
+
+    // Succes: toon stappen
+    var stepsMsg = (data.steps || []).map(function(s) {
+      var icon = s.status === 'ok' ? '✓' : s.status === 'al_gedaan' ? '—' : '⚠';
+      return icon + ' ' + s.step;
+    }).join('  ');
+    toast('Klaar! ' + stepsMsg);
+    apiFetch('/zaken/' + zaakId, function(e,z){ if(!e) renderDocsTab(z); });
+  });
+}
+
+function toggleDocSamenvatting(docId) {
+  var body = document.getElementById('docSamBody_' + docId);
+  var icon = document.getElementById('docSamToggle_' + docId);
+  if (!body) return;
+  if (body.style.display === 'none') {
+    body.style.display = '';
+    if (icon) icon.textContent = 'expand_less';
+  } else {
+    body.style.display = 'none';
+    if (icon) icon.textContent = 'expand_more';
+  }
+}
+
+function scanFolder(zaakId) {
+  apiFetch('/zaken/' + zaakId + '/scan-folder', { method: 'POST' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast(data.count + ' nieuwe documenten gevonden');
+    go('/zaak/' + zaakId);
+  });
+}
+
+function addDocsByPath(zaakId) {
+  var path = prompt('Voer het pad in naar een bestand of map:');
+  if (!path) return;
+  apiFetch('/zaken/' + zaakId + '/documenten', { method: 'POST', body: { paths: [path] } }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast(data.count + ' document(en) toegevoegd');
+    go('/zaak/' + zaakId);
+  });
+}
+
+function deleteZaak(zaakId) {
+  if (!confirm('Weet u zeker dat u deze zaak wilt verwijderen? De bestanden op schijf worden NIET verwijderd.')) return;
+  apiFetch('/zaken/' + zaakId, { method: 'DELETE' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast('Zaak verwijderd');
+    go('/');
+  });
+}
+
+// ---- ANON TAB ----
+function renderAnonTab(zaakId) {
+  var tc = document.getElementById('tabContent');
+  tc.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  apiFetch('/zaken/' + zaakId + '/documenten', function(err, docs) {
+    if (err) { tc.innerHTML = '<p>Fout bij laden</p>'; return; }
+    var h = '<div style="display:flex;gap:8px;margin-bottom:16px">';
+    h += '<button class="btn btn-blue btn-sm" onclick="anonAll(\'' + zaakId + '\',true)"><span class="mi">security</span> Alles anonimiseren (Ollama)</button>';
+    h += '<button class="btn btn-ghost btn-sm" onclick="anonAll(\'' + zaakId + '\',false)"><span class="mi">security</span> Alleen regex</button>';
+    h += '</div>';
+    if (!docs.length) { h += '<p style="color:var(--tx3)">Geen documenten om te anonimiseren.</p>'; }
+    else {
+      docs.forEach(function(d) {
+        var icon = d.anonymization_reviewed ? '&#10003; Goedgekeurd' : d.has_anonymized ? '&#9888; Review nodig' : '— Niet geanonimiseerd';
+        var color = d.anonymization_reviewed ? 'var(--green)' : d.has_anonymized ? 'var(--yellow)' : 'var(--tx3)';
+        var piiCount = d.pii_count || 0;
+        h += '<div class="card" style="margin-bottom:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">';
+        h += '<div><span style="font-weight:600;font-size:14px">' + esc(d.bestandsnaam) + '</span>';
+        h += ' <span style="color:' + color + ';font-size:12px;margin-left:8px">' + icon + '</span>';
+        if (piiCount > 0) h += ' <span class="badge badge-purple" style="font-size:10px;margin-left:6px">' + piiCount + ' PII</span>';
+        h += '</div>';
+        h += '<button class="btn btn-ghost btn-sm" onclick="go(\'/anonimiseer/' + d.id + '\')"><span class="mi">edit</span> Review</button>';
+        h += '</div>';
+      });
+    }
+    tc.innerHTML = h;
+  });
+}
+
+function anonAll(zaakId, useOllama) {
+  var tc = document.getElementById('tabContent');
+  // Toon voortgang
+  var h = '<div class="card" style="padding:20px;text-align:center">';
+  h += '<div class="loading"><div class="spinner"></div></div>';
+  h += '<p style="font-size:15px;font-weight:600;margin-top:12px">Documenten anonimiseren...</p>';
+  h += '<p style="color:var(--tx3);font-size:13px">' + (useOllama ? 'Ollama AI + regex patronen' : 'Alleen regex patronen') + '</p>';
+  h += '<div id="anonProgress" style="margin-top:12px;color:var(--tx3);font-size:13px">Even geduld, dit kan even duren bij grote documenten.</div>';
+  h += '</div>';
+  tc.innerHTML = h;
+
+  apiFetch('/zaken/' + zaakId + '/anonymize-all', { method: 'POST', body: { use_ollama: useOllama } }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); tc.innerHTML = '<div style="color:var(--red);padding:16px">' + esc(err || data.error) + '</div>'; return; }
+
+    var results = data.results || [];
+    var done = results.filter(function(r){ return r.status === 'ok'; }).length;
+    var skipped = results.filter(function(r){ return r.status === 'no_text'; }).length;
+    var totalPii = results.reduce(function(sum, r){ return sum + (r.pii_count || 0); }, 0);
+
+    // Toon resultaat overzicht
+    var rh = '<div class="card" style="padding:20px;border-color:var(--green)">';
+    rh += '<h3 style="font-size:16px;color:var(--green);margin-bottom:12px"><span class="mi" style="vertical-align:middle">check_circle</span> Anonimisering voltooid!</h3>';
+    rh += '<div style="display:flex;gap:24px;margin-bottom:16px">';
+    rh += '<div><span style="font-size:24px;font-weight:800;color:var(--tx1)">' + done + '</span><br><span style="font-size:12px;color:var(--tx3)">documenten verwerkt</span></div>';
+    rh += '<div><span style="font-size:24px;font-weight:800;color:var(--purple)">' + totalPii + '</span><br><span style="font-size:12px;color:var(--tx3)">PII gevonden</span></div>';
+    if (skipped > 0) rh += '<div><span style="font-size:24px;font-weight:800;color:var(--yellow)">' + skipped + '</span><br><span style="font-size:12px;color:var(--tx3)">overgeslagen (geen tekst)</span></div>';
+    if (data.new_rules_saved > 0) rh += '<div><span style="font-size:24px;font-weight:800;color:var(--accent)">' + data.new_rules_saved + '</span><br><span style="font-size:12px;color:var(--tx3)">nieuwe regels opgeslagen</span></div>';
+    rh += '</div>';
+
+    // Per document details
+    rh += '<table style="font-size:13px;margin-top:8px;width:100%;border-collapse:collapse">';
+    results.forEach(function(r) {
+      var naam = r.bestandsnaam || r.id;
+      if (r.status === 'ok') {
+        rh += '<tr style="border-bottom:1px solid var(--glass-bd)">';
+        rh += '<td style="padding:6px 8px 6px 0;width:20px"><span class="mi" style="font-size:14px;color:var(--green)">check_circle</span></td>';
+        rh += '<td style="padding:6px 0">' + esc(naam) + '</td>';
+        rh += '<td style="padding:6px 0;text-align:right">';
+        if (r.pii_count > 0) rh += '<span class="badge badge-purple" style="font-size:10px">' + r.pii_count + ' PII</span>';
+        rh += '</td></tr>';
+      } else if (r.status === 'no_text') {
+        rh += '<tr style="border-bottom:1px solid var(--glass-bd);color:var(--tx3)">';
+        rh += '<td style="padding:6px 8px 6px 0;width:20px"><span class="mi" style="font-size:14px;color:var(--red)">error</span></td>';
+        rh += '<td style="padding:6px 0">' + esc(naam) + '</td>';
+        rh += '<td style="padding:6px 0;text-align:right;font-size:11px;color:var(--red)">' + esc(r.error || 'geen tekst') + '</td></tr>';
+      }
+    });
+    rh += '</table>';
+
+    rh += '<div style="margin-top:16px;display:flex;gap:8px">';
+    rh += '<button class="btn btn-blue btn-sm" onclick="renderAnonTab(\'' + zaakId + '\')"><span class="mi">list</span> Bekijk documenten</button>';
+    rh += '</div></div>';
+
+    tc.innerHTML = rh;
+    toast(done + ' documenten geanonimiseerd!');
+  });
+}
+
+// ---- ANON REVIEW PAGE ----
+function pgAnonReview(docId) {
+  var app = document.getElementById('app');
+  app.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  apiFetch('/documenten/' + docId + '/anonymized', function(err, data, ok) {
+    if (err || !ok) { app.innerHTML = '<p>Document niet gevonden</p>'; return; }
+    renderAnonReview(data);
+  });
+}
+
+function renderAnonReview(d) {
+  var app = document.getElementById('app');
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
+  h += '<div class="section-title" style="margin-bottom:0"><span class="mi">security</span> Anonimisering: ' + esc(d.bestandsnaam) + '</div>';
+  h += '<div style="display:flex;gap:8px">';
+  h += '<button class="btn btn-green btn-sm" onclick="approveAnon(\'' + d.id + '\')"><span class="mi">check</span> Goedkeuren</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="history.back()">Terug</button>';
+  h += '</div></div>';
+
+  // Stats
+  if (d.stats && d.stats.total > 0) {
+    h += '<div class="card" style="margin-bottom:16px;padding:12px 16px;font-size:13px;display:flex;gap:16px;flex-wrap:wrap">';
+    h += '<span><strong>' + d.stats.total + '</strong> vervangingen</span>';
+    Object.keys(d.stats.types || {}).forEach(function(t) {
+      h += '<span class="badge badge-blue">' + t + ': ' + d.stats.types[t] + '</span>';
+    });
+    h += '</div>';
+  }
+
+  // Diff view
+  h += '<div class="diff-container">';
+  h += '<div class="diff-panel"><h4>Origineel</h4>' + highlightPII(esc(d.extracted_text), d.anonymization_map) + '</div>';
+  h += '<div class="diff-panel"><h4>Geanonimiseerd</h4>' + esc(d.anonymized_text) + '</div>';
+  h += '</div>';
+
+  // PII items per document (uit database)
+  var piiItems = d.pii_items || [];
+  if (piiItems.length) {
+    h += '<h3 style="font-size:14px;margin:20px 0 8px"><span class="mi" style="color:var(--purple)">fingerprint</span> Opgeslagen persoonsgegevens (' + piiItems.length + ' items)</h3>';
+    h += '<div class="card" style="padding:0;overflow:hidden">';
+    h += '<table class="map-table" style="margin:0"><thead><tr><th>Type</th><th>Origineel</th><th>Vervanging</th><th></th></tr></thead><tbody>';
+    piiItems.forEach(function(p) {
+      var typeColor = p.type === 'naam' ? 'var(--blue)' : p.type === 'email' ? 'var(--green)' : p.type === 'telefoon' ? 'var(--yellow)' : p.type === 'adres' ? 'var(--purple)' : p.type === 'postcode' ? 'var(--accent)' : 'var(--tx3)';
+      h += '<tr>';
+      h += '<td><span class="badge" style="background:' + typeColor + ';color:#fff;font-size:10px;padding:2px 8px">' + esc(p.type) + '</span></td>';
+      h += '<td style="color:var(--red);font-family:monospace;font-size:12px">' + esc(p.origineel) + '</td>';
+      h += '<td style="font-family:monospace;font-size:12px;color:var(--green)">' + esc(p.vervanging) + '</td>';
+      h += '<td><button class="btn btn-ghost btn-sm" onclick="deletePII(\'' + esc(d.id) + '\',' + p.id + ')"><span class="mi">close</span></button></td>';
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+
+  // Mapping table
+  var map = d.anonymization_map || {};
+  var entries = Object.entries(map);
+  if (entries.length) {
+    h += '<h3 style="font-size:14px;margin:20px 0 8px">Mapping (' + entries.length + ' vervangingen)</h3>';
+    h += '<table class="map-table"><thead><tr><th>Origineel</th><th>Vervanging</th><th></th></tr></thead><tbody>';
+    entries.forEach(function(e, i) {
+      h += '<tr><td style="color:var(--red);font-family:monospace;font-size:12px">' + esc(e[0]) + '</td>';
+      h += '<td><input value="' + esc(e[1]) + '" data-orig="' + esc(e[0]) + '" class="map-input"></td>';
+      h += '<td><button class="btn btn-ghost btn-sm" onclick="removeMapping(\'' + esc(d.id) + '\',\'' + esc(e[0]).replace(/'/g,"\\'") + '\')"><span class="mi">close</span></button></td></tr>';
+    });
+    h += '</tbody></table>';
+    h += '<button class="btn btn-blue btn-sm" style="margin-top:12px" onclick="saveMapping(\'' + d.id + '\')"><span class="mi">save</span> Mapping opslaan</button>';
+  }
+
+  app.innerHTML = h;
+}
+
+function highlightPII(escapedText, map) {
+  var result = escapedText;
+  Object.keys(map || {}).forEach(function(orig) {
+    var escaped = esc(orig);
+    result = result.split(escaped).join('<span class="highlight-pii">' + escaped + '</span>');
+  });
+  return result;
+}
+
+function approveAnon(docId) {
+  apiFetch('/documenten/' + docId + '/approve-anon', { method: 'POST' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast('Anonimisering goedgekeurd!');
+    history.back();
+  });
+}
+
+function deletePII(docId, piiId) {
+  if (!confirm('PII-item verwijderen uit de database?')) return;
+  apiFetch('/documenten/' + docId + '/pii/' + piiId, { method: 'DELETE' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast('PII-item verwijderd');
+    pgAnonReview(docId);
+  });
+}
+
+function saveMapping(docId) {
+  var map = {};
+  document.querySelectorAll('.map-input').forEach(function(input) {
+    map[input.dataset.orig] = input.value;
+  });
+  apiFetch('/documenten/' + docId + '/anonymized', { method: 'PUT', body: { anonymization_map: map } }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (err || data.error)); return; }
+    toast('Mapping opgeslagen');
+    pgAnonReview(docId);
+  });
+}
+
+// ---- ANALYSE TAB ----
+function renderAnalyseTab(zaakId) {
+  var tc = document.getElementById('tabContent');
+  tc.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  var h = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<button class="btn btn-blue btn-sm" onclick="runAnalysis(\'' + zaakId + '\',\'procedure_advies\')"><span class="mi">gavel</span> Procedure-advies</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="runAnalysis(\'' + zaakId + '\',\'deadline_check\')"><span class="mi">schedule</span> Termijnen</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="runAnalysis(\'' + zaakId + '\',\'uitleg\')"><span class="mi">help</span> Uitleg</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="runAnalysis(\'' + zaakId + '\',\'concept\')"><span class="mi">edit_document</span> Concept</button>';
+  h += '</div>';
+  h += '<div id="analyseResults"><div class="loading"><div class="spinner"></div></div></div>';
+
+  tc.innerHTML = h;
+
+  apiFetch('/zaken/' + zaakId + '/analyses', function(err, data) {
+    var el = document.getElementById('analyseResults');
+    if (!el) return;
+    if (err || !data.length) { el.innerHTML = '<p style="color:var(--tx3)">Nog geen analyses. Klik op een knop hierboven om te starten.</p>'; return; }
+    el.innerHTML = data.map(function(a) {
+      var typeLabel = {procedure_advies:'Procedure-advies',deadline_check:'Termijnen',uitleg:'Uitleg',concept:'Concept-document'}[a.type] || a.type;
+      return '<div class="analysis-card"><h3><span class="mi" style="color:var(--accent)">psychology</span> ' + esc(typeLabel) +
+        ' <span style="font-size:11px;color:var(--tx3);font-weight:400">' + fmtDateTime(a.created_at) + ' &middot; ' + esc(a.ai_provider) + '/' + esc(a.ai_model) + '</span></h3>' +
+        '<div class="analysis-body">' + esc(a.result_text) + '</div></div>';
+    }).join('');
+  });
+}
+
+function runAnalysis(zaakId, type) {
+  // Check of samenvatting actueel is
+  apiFetch('/zaken/' + zaakId, function(err, z) {
+    if (err) { toast('Fout bij laden zaak'); return; }
+    var hasAnon = (z.documenten || []).some(function(d) { return d.has_anonymized; });
+    if (hasAnon && !z.samenvatting) {
+      if (confirm('Er is nog geen samenvatting voor deze zaak. Wilt u eerst een samenvatting genereren?')) {
+        generateSamenvatting(zaakId);
+        return;
+      }
+    } else if (z.samenvatting && z.doc_count !== z.samenvatting_doc_count) {
+      if (confirm('De samenvatting is verouderd (er zijn nieuwe documenten toegevoegd). Wilt u de samenvatting eerst bijwerken?')) {
+        generateSamenvatting(zaakId);
+        return;
+      }
+    }
+    // Ga door met analyse
+    toast('Analyse starten (' + type + ')...');
+    var el = document.getElementById('analyseResults');
+    if (el) el.innerHTML = '<div class="loading"><div class="spinner"></div> Bezig met analyse... Dit kan even duren.</div>';
+    apiFetch('/zaken/' + zaakId + '/analyze', { method: 'POST', body: { type: type, force: true } }, function(err2, data, ok) {
+      if (err2 || !ok) { toast('Fout: ' + (err2 || data.error)); if(el) el.innerHTML = '<div style="color:var(--red)">' + esc(err2 || data.error) + '</div>'; return; }
+      toast('Analyse voltooid!');
+      renderAnalyseTab(zaakId);
+    });
+  });
+}
+
+// ---- TIJDLIJN TAB ----
+var _timelineFilter = 'all'; // 'all', 'document', 'email'
+var _timelineData = null;
+
+function renderTimelineTab(zaakId) {
+  var tc = document.getElementById('tabContent');
+  tc.innerHTML = '<div class="loading"><div class="spinner"></div> <span style="color:var(--tx3);font-size:13px">Tijdlijn laden (documenten + e-mails)...</span></div>';
+  _timelineFilter = 'all';
+
+  apiFetch('/zaken/' + zaakId + '/timeline', function(err, data, ok) {
+    if (err || !ok) { tc.innerHTML = '<p style="color:var(--red)">Fout bij laden tijdlijn: ' + esc(err || (data && data.error) || 'onbekend') + '</p>'; return; }
+    _timelineData = data;
+    drawTimeline(tc, data, zaakId);
+  });
+}
+
+function drawTimeline(tc, data, zaakId) {
+  var items = data.items || [];
+
+  // Filter toepassen
+  var filtered = items;
+  if (_timelineFilter !== 'all') {
+    filtered = items.filter(function(it) { return it.type === _timelineFilter; });
+  }
+
+  var docCount = items.filter(function(it){ return it.type === 'document'; }).length;
+  var emailCount = items.filter(function(it){ return it.type === 'email'; }).length;
+
+  var h = '';
+
+  // Filter bar
+  h += '<div class="tl-filter">';
+  h += '<button class="tl-filter-btn' + (_timelineFilter==='all'?' active':'') + '" onclick="setTlFilter(\'all\',\'' + zaakId + '\')"><span class="mi" style="font-size:14px">list</span> Alles (' + items.length + ')</button>';
+  h += '<button class="tl-filter-btn' + (_timelineFilter==='document'?' active':'') + '" onclick="setTlFilter(\'document\',\'' + zaakId + '\')"><span class="mi" style="font-size:14px;color:var(--accent)">description</span> Documenten (' + docCount + ')</button>';
+  h += '<button class="tl-filter-btn' + (_timelineFilter==='email'?' active':'') + '" onclick="setTlFilter(\'email\',\'' + zaakId + '\')"><span class="mi" style="font-size:14px;color:var(--purple)">email</span> E-mails (' + emailCount + ')</button>';
+
+  if (!emailCount) {
+    h += '<span style="font-size:11px;color:var(--tx3);margin-left:8px"><span class="mi mi-sm">info</span> Koppel Outlook via Instellingen om e-mails te doorzoeken</span>';
+  }
+  h += '</div>';
+
+  if (!filtered.length) {
+    h += '<div class="empty-state"><span class="mi">timeline</span>';
+    if (_timelineFilter === 'email') {
+      h += '<p>Geen e-mails gevonden voor deze zaak.<br><a href="#/instellingen" style="color:var(--accent)">Koppel Outlook</a> om e-mails te doorzoeken.</p>';
+    } else {
+      h += '<p>Geen items in de tijdlijn.</p>';
+    }
+    h += '</div>';
+    tc.innerHTML = h;
+    return;
+  }
+
+  // Groepeer per datum
+  h += '<div class="tl-container"><div class="tl-line"></div>';
+  var lastDate = '';
+  filtered.forEach(function(it) {
+    var dateStr = it.date || 'Onbekende datum';
+    if (dateStr !== lastDate) {
+      lastDate = dateStr;
+      h += '<div class="tl-date-header">' + (dateStr === 'Onbekende datum' ? dateStr : fmtDate(dateStr)) + '</div>';
+    }
+
+    h += '<div class="tl-item">';
+    h += '<div class="tl-dot ' + it.type + '"></div>';
+
+    if (it.type === 'document') {
+      h += '<div class="tl-card doc-card" onclick="go(\'/document/' + it.doc_id + '\')">';
+      h += '<div class="tl-title"><span class="mi" style="font-size:16px;color:var(--accent)">description</span> ' + esc(it.title);
+      if (it.doc_type) h += ' <span class="badge badge-blue" style="font-size:10px">' + esc(it.doc_type) + '</span>';
+      if (it.richting) {
+        var rIcon = {inkomend:'call_received', uitgaand:'call_made', intern:'swap_horiz'}[it.richting] || '';
+        h += ' <span class="badge" style="font-size:10px;background:rgba(148,163,184,.1);color:var(--tx2)"><span class="mi" style="font-size:11px;vertical-align:-2px">' + rIcon + '</span> ' + esc(it.richting) + '</span>';
+      }
+      h += '</div>';
+      if (it.subtitle) h += '<div class="tl-sub">' + esc(it.subtitle) + '</div>';
+      h += '<div class="tl-meta">';
+      if (it.afzender) h += '<span><span class="mi">person</span> ' + esc(it.afzender) + '</span>';
+      if (it.ontvanger) h += '<span><span class="mi">arrow_forward</span> ' + esc(it.ontvanger) + '</span>';
+      if (it.kenmerk) h += '<span><span class="mi">tag</span> ' + esc(it.kenmerk) + '</span>';
+      if (it.has_text) h += '<span style="color:var(--green)"><span class="mi">check_circle</span> tekst</span>';
+      h += '</div>';
+      h += '</div>';
+    } else if (it.type === 'email') {
+      h += '<div class="tl-card email-card" onclick="showEmailDetail(\'' + esc(it.email_id) + '\')">';
+      h += '<div class="tl-title"><span class="mi" style="font-size:16px;color:var(--purple)">email</span> ' + esc(it.title);
+      if (it.importance === 'high') h += ' <span class="badge badge-red" style="font-size:10px">belangrijk</span>';
+      if (it.has_attachments) h += ' <span class="mi" style="font-size:14px;color:var(--tx3)" title="Heeft bijlagen">attach_file</span>';
+      h += '</div>';
+      if (it.subtitle) h += '<div class="tl-sub">' + esc(it.subtitle) + '</div>';
+      h += '<div class="tl-meta">';
+      if (it.from_name || it.from_email) h += '<span><span class="mi">person</span> ' + esc(it.from_name || it.from_email) + '</span>';
+      if (it.to && it.to.length) h += '<span><span class="mi">arrow_forward</span> ' + esc(it.to[0]) + (it.to.length > 1 ? ' +' + (it.to.length-1) : '') + '</span>';
+      h += '</div>';
+      h += '</div>';
+    }
+
+    h += '</div>'; // tl-item
+  });
+  h += '</div>'; // tl-container
+
+  tc.innerHTML = h;
+}
+
+function setTlFilter(filter, zaakId) {
+  _timelineFilter = filter;
+  if (_timelineData) {
+    drawTimeline(document.getElementById('tabContent'), _timelineData, zaakId);
+  }
+}
+
+function showEmailDetail(messageId) {
+  // Open email detail modal
+  var modal = document.createElement('div');
+  modal.className = 'email-modal';
+  modal.id = 'emailModal';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = '<div class="email-modal-box">' +
+    '<div class="email-modal-header"><span class="mi" style="color:var(--purple)">email</span> <h3>E-mail laden...</h3>' +
+    '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'emailModal\').remove()"><span class="mi">close</span></button></div>' +
+    '<div class="email-modal-body"><div class="loading"><div class="spinner"></div></div></div></div>';
+  document.body.appendChild(modal);
+
+  apiFetch('/outlook/email/' + messageId, function(err, email, ok) {
+    var box = modal.querySelector('.email-modal-box');
+    if (!box) return;
+    if (err || !ok) {
+      box.innerHTML = '<div class="email-modal-header"><span class="mi" style="color:var(--red)">error</span> <h3>Fout</h3>' +
+        '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'emailModal\').remove()"><span class="mi">close</span></button></div>' +
+        '<div class="email-modal-body" style="color:var(--red)">' + esc(err || (email && email.error) || 'Onbekend') + '</div>';
+      return;
+    }
+
+    var h = '<div class="email-modal-header"><span class="mi" style="color:var(--purple)">email</span> <h3>' + esc(email.subject) + '</h3>';
+    h += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'emailModal\').remove()"><span class="mi">close</span></button></div>';
+
+    h += '<div class="email-modal-meta">';
+    h += '<div><strong>Van:</strong> ' + esc(email.from_name || '') + ' &lt;' + esc(email.from_email || '') + '&gt;</div>';
+    if (email.to && email.to.length) h += '<div><strong>Aan:</strong> ' + esc(email.to.join(', ')) + '</div>';
+    if (email.cc && email.cc.length) h += '<div><strong>CC:</strong> ' + esc(email.cc.join(', ')) + '</div>';
+    h += '<div><strong>Datum:</strong> ' + fmtDateTime(email.received || email.sent) + '</div>';
+    if (email.has_attachments) h += '<div><span class="mi mi-sm" style="color:var(--yellow)">attach_file</span> <strong>Bijlagen</strong></div>';
+    h += '</div>';
+
+    h += '<div class="email-modal-body">';
+    if (email.body_type === 'html') {
+      // Render HTML email in sandboxed iframe
+      h += '<iframe id="emailFrame" sandbox="allow-same-origin" style="width:100%;min-height:400px;border:none;background:#fff;border-radius:var(--rs)"></iframe>';
+    } else {
+      h += '<pre style="white-space:pre-wrap;font-family:var(--font);font-size:13px;line-height:1.7">' + esc(email.body || email.preview || '') + '</pre>';
+    }
+    h += '</div>';
+
+    box.innerHTML = h;
+
+    // Als HTML body, schrijf naar iframe
+    if (email.body_type === 'html' && email.body) {
+      var frame = document.getElementById('emailFrame');
+      if (frame) {
+        setTimeout(function() {
+          var doc = frame.contentDocument || frame.contentWindow.document;
+          doc.open();
+          doc.write('<html><head><style>body{font-family:sans-serif;font-size:14px;color:#333;padding:16px;margin:0;}</style></head><body>' + email.body + '</body></html>');
+          doc.close();
+          // Auto-resize iframe
+          setTimeout(function() {
+            try { frame.style.height = (doc.body.scrollHeight + 40) + 'px'; } catch(e){}
+          }, 200);
+        }, 50);
+      }
+    }
+  });
+}
+
+// ---- MELDPUNT TAB ----
+function renderMeldpuntTab(zaakId) {
+  var tc = document.getElementById('tabContent');
+  tc.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  apiFetch('/meldpunt/prepare/' + zaakId, function(err, melding) {
+    if (err) { tc.innerHTML = '<p>Fout bij laden</p>'; return; }
+    var h = '<div class="card">';
+    h += '<h3 style="font-size:15px;margin-bottom:16px"><span class="mi" style="color:var(--red)">flag</span> Melding indienen bij Meldpunt Ambtenaren</h3>';
+    h += '<div class="form-group"><label class="form-label">Titel</label><input class="form-input" id="mpTitel" value="' + esc(melding.titel) + '"></div>';
+    h += '<div class="form-group"><label class="form-label">Ambtenaar / Wederpartij</label><input class="form-input" id="mpNaam" value="' + esc((melding.namen[0]||{}).naam||'') + '"></div>';
+    h += '<div class="form-group"><label class="form-label">Functie</label><input class="form-input" id="mpFunctie" value="' + esc((melding.namen[0]||{}).functie||'') + '"></div>';
+    h += '<div class="form-group"><label class="form-label">Instantie</label><input class="form-input" id="mpInstantie" value="' + esc(melding.instantie) + '"></div>';
+    h += '<div class="form-group"><label class="form-label">Verhaal</label><textarea class="form-input" id="mpVerhaal" rows="8">' + esc(melding.verhaal) + '</textarea></div>';
+    h += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">';
+    h += '<input type="checkbox" id="mpAnoniem" ' + (melding.anoniem ? 'checked' : '') + '> <label for="mpAnoniem" style="font-size:13px">Anoniem indienen</label>';
+    h += '</div>';
+    h += '<button class="btn btn-red" onclick="submitMelding(\'' + zaakId + '\')"><span class="mi">send</span> Melding indienen</button>';
+    h += '<div id="mpResult" style="margin-top:12px"></div>';
+    h += '</div>';
+    tc.innerHTML = h;
+  });
+}
+
+function submitMelding(zaakId) {
+  var data = {
+    namen: [{ naam: document.getElementById('mpNaam').value, functie: document.getElementById('mpFunctie').value }],
+    titel: document.getElementById('mpTitel').value,
+    verhaal: document.getElementById('mpVerhaal').value,
+    instantie: document.getElementById('mpInstantie').value,
+    anoniem: document.getElementById('mpAnoniem').checked,
+  };
+  var el = document.getElementById('mpResult');
+  el.innerHTML = '<div class="spinner"></div>';
+  apiFetch('/meldpunt/submit', { method: 'POST', body: data }, function(err, result, ok) {
+    if (err || !ok) { el.innerHTML = '<div style="color:var(--red)">' + esc(err || result.error) + '</div>'; return; }
+    el.innerHTML = '<div style="color:var(--green)"><span class="mi mi-sm">check_circle</span> Melding ingediend! Claim code: <strong>' + esc(result.claimCode || '—') + '</strong></div>';
+    toast('Melding ingediend bij Meldpunt Ambtenaren');
+  });
+}
+
+// ---- DOCUMENT DETAIL ----
+function pgDocument(docId) {
+  var app = document.getElementById('app');
+  app.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  apiFetch('/documenten/' + docId + '/text', function(err, data, ok) {
+    if (err || !ok) { app.innerHTML = '<p>Document niet gevonden</p>'; return; }
+    var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
+    h += '<div class="section-title" style="margin-bottom:0"><span class="mi">description</span> ' + esc(data.bestandsnaam) + '</div>';
+    h += '<button class="btn btn-ghost btn-sm" onclick="history.back()">Terug</button>';
+    h += '</div>';
+
+    // Metadata
+    var meta = data.metadata || {};
+    if (meta.kenmerk && meta.kenmerk.length || meta.datums && meta.datums.length || meta.onderwerp) {
+      h += '<div class="card" style="margin-bottom:16px;padding:12px 16px;font-size:13px">';
+      if (meta.onderwerp) h += '<div><strong>Onderwerp:</strong> ' + esc(meta.onderwerp) + '</div>';
+      if (meta.kenmerk && meta.kenmerk.length) h += '<div><strong>Kenmerk:</strong> ' + meta.kenmerk.map(esc).join(', ') + '</div>';
+      if (meta.datums && meta.datums.length) h += '<div><strong>Datums:</strong> ' + meta.datums.join(', ') + '</div>';
+      if (meta.bsn_detected) h += '<div style="color:var(--red)"><span class="mi mi-sm">warning</span> <strong>BSN gedetecteerd!</strong> Dit document bevat mogelijk een burgerservicenummer.</div>';
+      if (meta.bezwaartermijn_mentioned) h += '<div style="color:var(--yellow)"><span class="mi mi-sm">schedule</span> Bezwaartermijn genoemd in document</div>';
+      h += '</div>';
+    }
+
+    // Text
+    if (data.extracted_text) {
+      h += '<div class="card"><h3 style="font-size:14px;margin-bottom:8px">Geextraheerde tekst (' + data.extracted_text.length + ' tekens)</h3>';
+      h += '<pre style="white-space:pre-wrap;font-size:13px;line-height:1.8;max-height:600px;overflow-y:auto;color:var(--tx2)">' + esc(data.extracted_text) + '</pre>';
+      h += '</div>';
+    } else {
+      h += '<div class="empty-state"><span class="mi">text_snippet</span><p>Nog geen tekst geextraheerd.</p><button class="btn btn-blue" onclick="extractDoc(\'' + docId + '\',\'\');pgDocument(\'' + docId + '\')"><span class="mi">text_snippet</span> Extraheer tekst</button></div>';
+    }
+    app.innerHTML = h;
+  });
+}
+
+// ---- ANALYSE PAGE (standalone) ----
+function pgAnalyse(zaakId) {
+  var app = document.getElementById('app');
+  app.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  apiFetch('/zaken/' + zaakId + '/analyses', function(err, data) {
+    if (err) { app.innerHTML = '<p>Fout bij laden</p>'; return; }
+    var h = '<div class="section-title"><span class="mi">psychology</span> Analyses</div>';
+    if (!data.length) {
+      h += '<div class="empty-state"><span class="mi">psychology</span><p>Nog geen analyses.</p></div>';
+    } else {
+      data.forEach(function(a) {
+        h += '<div class="analysis-card"><h3>' + esc(a.type) + ' <span style="font-size:11px;color:var(--tx3)">' + fmtDateTime(a.created_at) + '</span></h3>';
+        h += '<div class="analysis-body">' + esc(a.result_text) + '</div></div>';
+      });
+    }
+    app.innerHTML = h;
+  });
+}
+
+// ---- PROCEDURES ----
+var _procFilter = 'alle';
+
+function pgProcedures() {
+  var h = '';
+
+  // Hero / intro
+  h += '<div class="legal-intro">';
+  h += '<h2><span class="mi" style="color:var(--accent);vertical-align:-4px">menu_book</span> Nederlandse Juridische Procedures — Overzicht</h2>';
+  h += '<p>Hieronder vindt u een compleet overzicht van de belangrijkste juridische procedures in Nederland. ';
+  h += 'Alle procedures zijn vastgelegd bij wet: het bestuursrecht in de <strong>Algemene wet bestuursrecht (Awb)</strong>, ';
+  h += 'het civiel recht in het <strong>Wetboek van Burgerlijke Rechtsvordering (Rv)</strong> en het <strong>Burgerlijk Wetboek (BW)</strong>, ';
+  h += 'en het strafrecht in het <strong>Wetboek van Strafvordering (Sv)</strong>.</p>';
+  h += '</div>';
+
+  // Procedure flow: bestuursrecht keten
+  h += '<div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--tx2)"><span class="mi mi-sm" style="color:var(--accent)">route</span> Bestuursrechtelijke rechtsgang (de keten)</div>';
+  h += '<div class="legal-flow">';
+  h += '<span class="legal-flow-item" style="background:rgba(234,179,8,.15);color:#eab308" onclick="scrollToProc(\'klacht\')">Klacht</span>';
+  h += '<span class="legal-flow-arrow">of</span>';
+  h += '<span class="legal-flow-item" style="background:rgba(59,130,246,.15);color:#3b82f6" onclick="scrollToProc(\'bezwaar\')">Bezwaar</span>';
+  h += '<span class="legal-flow-arrow">&rarr;</span>';
+  h += '<span class="legal-flow-item" style="background:rgba(139,92,246,.15);color:#8b5cf6" onclick="scrollToProc(\'beroep\')">Beroep</span>';
+  h += '<span class="legal-flow-arrow">&rarr;</span>';
+  h += '<span class="legal-flow-item" style="background:rgba(236,72,153,.15);color:#ec4899" onclick="scrollToProc(\'hoger_beroep\')">Hoger beroep</span>';
+  h += '<span class="legal-flow-arrow">|</span>';
+  h += '<span class="legal-flow-item" style="background:rgba(249,115,22,.15);color:#f97316" onclick="scrollToProc(\'voorlopige_voorziening\')">Voorlopige voorziening</span>';
+  h += '<span class="legal-flow-arrow" style="font-size:11px">(spoed, naast bezwaar/beroep)</span>';
+  h += '</div>';
+
+  h += '<div class="legal-flow" style="margin-top:8px;margin-bottom:24px">';
+  h += '<span style="font-size:12px;color:var(--tx3);margin-right:4px">Strafrecht:</span>';
+  h += '<span class="legal-flow-item" style="background:rgba(239,68,68,.15);color:#ef4444" onclick="scrollToProc(\'aangifte\')">Aangifte</span>';
+  h += '<span class="legal-flow-arrow">&rarr; bij sepot &rarr;</span>';
+  h += '<span class="legal-flow-item" style="background:rgba(190,24,93,.15);color:#be185d" onclick="scrollToProc(\'art12\')">Art. 12 Sv-klacht</span>';
+  h += '</div>';
+
+  // Filter bar
+  h += '<div class="legal-filter-bar">';
+  h += '<button class="legal-filter-btn' + (_procFilter==='alle'?' active':'') + '" onclick="filterProcs(\'alle\')"><span class="mi mi-sm">apps</span> Alle</button>';
+  h += '<button class="legal-filter-btn' + (_procFilter==='bestuursrecht'?' active':'') + '" onclick="filterProcs(\'bestuursrecht\')"><span class="mi mi-sm">account_balance</span> Bestuursrecht</button>';
+  h += '<button class="legal-filter-btn' + (_procFilter==='civiel_recht'?' active':'') + '" onclick="filterProcs(\'civiel_recht\')"><span class="mi mi-sm">description</span> Civiel recht</button>';
+  h += '<button class="legal-filter-btn' + (_procFilter==='strafrecht'?' active':'') + '" onclick="filterProcs(\'strafrecht\')"><span class="mi mi-sm">report</span> Strafrecht</button>';
+  h += '</div>';
+
+  // Placeholder for procedure cards
+  h += '<div id="procList"><div class="loading"><div class="spinner"></div></div></div>';
+
+  setTimeout(function(){ loadProcedures(); }, 10);
+  return h;
+}
+
+function filterProcs(cat) {
+  _procFilter = cat;
+  // update filter buttons
+  document.querySelectorAll('.legal-filter-btn').forEach(function(b) {
+    b.classList.remove('active');
+    if (cat === 'alle' && b.textContent.trim().indexOf('Alle') !== -1) b.classList.add('active');
+    else if (b.textContent.trim().toLowerCase().indexOf(cat.replace('_',' ')) !== -1) b.classList.add('active');
+  });
+  loadProcedures();
+}
+
+function scrollToProc(type) {
+  var el = document.getElementById('proc-' + type);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // briefly expand it
+    if (!el.classList.contains('expanded')) {
+      el.classList.add('expanded');
+    }
+  }
+}
+
+function toggleProcCard(type) {
+  var el = document.getElementById('proc-' + type);
+  if (el) el.classList.toggle('expanded');
+}
+
+function loadProcedures() {
+  apiFetch('/procedures', function(err, data) {
+    var el = document.getElementById('procList');
+    if (!el) return;
+    if (err) { el.innerHTML = '<p style="color:var(--red)">Fout bij laden: ' + esc(err) + '</p>'; return; }
+
+    // Group by categorie
+    var cats = { bestuursrecht: [], civiel_recht: [], strafrecht: [] };
+    var catNames = { bestuursrecht: 'Bestuursrecht', civiel_recht: 'Civiel recht', strafrecht: 'Strafrecht' };
+    var catIcons = { bestuursrecht: 'account_balance', civiel_recht: 'description', strafrecht: 'report' };
+    var catColors = { bestuursrecht: '#3b82f6', civiel_recht: '#10b981', strafrecht: '#ef4444' };
+    var catDescs = {
+      bestuursrecht: 'Procedures tegen de overheid — Algemene wet bestuursrecht (Awb)',
+      civiel_recht: 'Geschillen tussen burgers/bedrijven onderling — Wetboek van Burgerlijke Rechtsvordering (Rv)',
+      strafrecht: 'Strafbare feiten — Wetboek van Strafvordering (Sv)'
+    };
+
+    data.forEach(function(p) {
+      var cat = p.categorie || 'bestuursrecht';
+      if (cats[cat]) cats[cat].push(p);
+    });
+
+    var h = '';
+    var catOrder = ['bestuursrecht', 'civiel_recht', 'strafrecht'];
+    catOrder.forEach(function(cat) {
+      if (_procFilter !== 'alle' && _procFilter !== cat) return;
+      var procs = cats[cat];
+      if (!procs || procs.length === 0) return;
+
+      // Category header
+      h += '<div class="legal-cat-section">';
+      h += '<div class="legal-cat-header">';
+      h += '<div class="legal-cat-icon" style="background:' + catColors[cat] + '"><span class="mi">' + catIcons[cat] + '</span></div>';
+      h += '<div><h2>' + catNames[cat] + '</h2><div style="font-size:12px;color:var(--tx3)">' + catDescs[cat] + '</div></div>';
+      h += '<span class="badge" style="background:rgba(148,163,184,.1);color:var(--tx2)">' + procs.length + ' procedures</span>';
+      h += '</div>';
+
+      // Procedure cards
+      procs.forEach(function(p) {
+        h += buildProcCard(p);
+      });
+
+      h += '</div>'; // legal-cat-section
+    });
+
+    if (!h) h = '<div class="empty-state"><span class="mi">search_off</span><p>Geen procedures gevonden voor dit filter.</p></div>';
+
+    el.innerHTML = h;
+  });
+}
+
+function buildProcCard(p) {
+  var kleur = p.kleur || 'var(--accent)';
+  var icon = p.icon || 'gavel';
+
+  var h = '<div class="legal-card" id="proc-' + esc(p.type) + '">';
+
+  // Clickable header
+  h += '<div class="legal-card-top" onclick="toggleProcCard(\'' + esc(p.type) + '\')">';
+  h += '<div class="legal-card-icon" style="background:' + kleur + '"><span class="mi">' + icon + '</span></div>';
+  h += '<div class="legal-card-info">';
+  h += '<h3>' + esc(p.naam) + '</h3>';
+  h += '<div class="legal-sub">';
+  h += '<span><span class="mi">book</span> ' + esc(p.wettelijke_basis) + '</span>';
+  h += '<span><span class="mi">schedule</span> ' + esc(p.termijn) + '</span>';
+  if (p.kosten) h += '<span><span class="mi">payments</span> ' + esc(p.kosten).substring(0, 50) + '</span>';
+  h += '</div>';
+  h += '</div>';
+  h += '<span class="mi legal-card-chevron">expand_more</span>';
+  h += '</div>';
+
+  // Expandable body
+  h += '<div class="legal-card-body">';
+
+  // Short description
+  h += '<div class="legal-section" style="background:rgba(59,130,246,.03)">';
+  h += '<p style="font-size:14px;color:var(--tx);font-weight:500">' + esc(p.beschrijving) + '</p>';
+  if (p.wanneer) {
+    h += '<div style="margin-top:10px"><h4 style="font-size:12px;margin-bottom:4px"><span class="mi">help</span> Wanneer gebruiken?</h4>';
+    h += '<p>' + esc(p.wanneer) + '</p></div>';
+  }
+  h += '</div>';
+
+  // Uitleg (main legal explanation)
+  if (p.uitleg) {
+    h += '<div class="legal-section">';
+    h += '<h4><span class="mi">menu_book</span> Hoe werkt het?</h4>';
+    h += '<div class="legal-text">' + esc(p.uitleg) + '</div>';
+    h += '</div>';
+  }
+
+  // Stappen (visual flow)
+  if (p.stappen && p.stappen.length) {
+    h += '<div class="legal-section">';
+    h += '<h4><span class="mi">format_list_numbered</span> Stappen</h4>';
+    h += '<div class="legal-steps-flow">';
+    p.stappen.forEach(function(s, i) {
+      h += '<div class="legal-step">';
+      h += '<div class="legal-step-num" style="background:' + kleur + '">' + (i + 1) + '</div>';
+      h += '<div class="legal-step-text">' + esc(s) + '</div>';
+      h += '</div>';
+    });
+    h += '</div>';
+    if (p.vervolg) {
+      h += '<div style="margin-top:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--rs);font-size:12px;color:var(--tx2)">';
+      h += '<span class="mi mi-sm" style="color:var(--accent)">arrow_forward</span> <strong>Vervolg:</strong> ' + esc(p.vervolg);
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Vereisten
+  if (p.vereisten && p.vereisten.length) {
+    h += '<div class="legal-section">';
+    h += '<h4><span class="mi">checklist</span> Vereisten</h4>';
+    h += '<ul>';
+    p.vereisten.forEach(function(v) { h += '<li>' + esc(v) + '</li>'; });
+    h += '</ul>';
+    h += '</div>';
+  }
+
+  // Wetsartikelen
+  if (p.wetsartikelen && p.wetsartikelen.length) {
+    h += '<div class="legal-section">';
+    h += '<h4><span class="mi">balance</span> Relevante wetsartikelen</h4>';
+    h += '<div class="legal-articles">';
+    p.wetsartikelen.forEach(function(a) {
+      h += '<div class="legal-article">';
+      h += '<span class="legal-article-ref">' + esc(a.artikel) + '</span>';
+      h += '<span class="legal-article-desc">' + esc(a.inhoud) + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+    h += '</div>';
+  }
+
+  // Kosten & instantie
+  if (p.kosten || p.instantie) {
+    h += '<div class="legal-section">';
+    h += '<h4><span class="mi">info</span> Praktisch</h4>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+    if (p.kosten) {
+      h += '<div style="font-size:13px"><strong style="color:var(--tx)">Kosten:</strong><br><span style="color:var(--tx2)">' + esc(p.kosten) + '</span></div>';
+    }
+    if (p.instantie) {
+      h += '<div style="font-size:13px"><strong style="color:var(--tx)">Bij wie indienen:</strong><br><span style="color:var(--tx2)">' + esc(p.instantie) + '</span></div>';
+    }
+    h += '</div>';
+    h += '</div>';
+  }
+
+  // Tips
+  if (p.tips && p.tips.length) {
+    h += '<div class="legal-section">';
+    h += '<h4><span class="mi">lightbulb</span> Tips</h4>';
+    h += '<div class="legal-tips">';
+    p.tips.forEach(function(t) {
+      h += '<div class="legal-tip"><span class="mi">lightbulb</span> ' + esc(t) + '</div>';
+    });
+    h += '</div>';
+    h += '</div>';
+  }
+
+  h += '</div>'; // legal-card-body
+  h += '</div>'; // legal-card
+
+  return h;
+}
+
+// ---- E-MAILS PAGINA ----
+var _emailPage = 1;
+var _emailFilter = {};
+
+function pgEmails() {
+  var app = document.getElementById('app');
+  app.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  // Laad stats + zaken parallel
+  var stats = null, zaken = null;
+  var done = 0;
+  function check() {
+    done++;
+    if (done >= 2) renderEmailPage(stats, zaken);
+  }
+  apiFetch('/emails/stats', function(err, data) { stats = data || {}; check(); });
+  apiFetch('/zaken', function(err, data) { zaken = data || []; check(); });
+}
+
+function renderEmailPage(stats, zaken) {
+  var app = document.getElementById('app');
+  var h = '<div class="section-title"><span class="mi">email</span> E-mails</div>';
+
+  // Stats cards
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">';
+  h += '<div class="card" style="padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--accent)">' + (stats.total || 0) + '</div><div style="font-size:12px;color:var(--tx3)">Totaal</div></div>';
+  h += '<div class="card" style="padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--green)">' + (stats.linked || 0) + '</div><div style="font-size:12px;color:var(--tx3)">Gekoppeld</div></div>';
+  h += '<div class="card" style="padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--yellow)">' + (stats.unlinked || 0) + '</div><div style="font-size:12px;color:var(--tx3)">Ongekoppeld</div></div>';
+  h += '<div class="card" style="padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--blue)">' + (stats.inkomend || 0) + '</div><div style="font-size:12px;color:var(--tx3)">Inkomend</div></div>';
+  h += '<div class="card" style="padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--purple)">' + (stats.uitgaand || 0) + '</div><div style="font-size:12px;color:var(--tx3)">Uitgaand</div></div>';
+  h += '</div>';
+
+  // Action buttons
+  h += '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<button class="btn btn-blue btn-sm" onclick="syncEmails()"><span class="mi">sync</span> Synchroniseer vanuit Outlook</button>';
+  h += '<button class="btn btn-green btn-sm" onclick="autoLinkEmails()"><span class="mi">link</span> Auto-koppel aan zaken</button>';
+  h += '</div>';
+
+  // Search + filter bar
+  h += '<div class="card" style="padding:12px 16px;margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">';
+  h += '<input id="emailSearch" type="text" placeholder="Zoek in e-mails..." style="flex:1;min-width:200px;background:var(--bg);border:1px solid var(--glass-bd);border-radius:var(--rs);padding:8px 12px;color:var(--tx);font:13px var(--font)" onkeydown="if(event.key===\'Enter\')searchEmails()">';
+  h += '<select id="emailZaakFilter" style="background:var(--bg);border:1px solid var(--glass-bd);border-radius:var(--rs);padding:8px;color:var(--tx);font:13px var(--font)">';
+  h += '<option value="">Alle zaken</option>';
+  h += '<option value="__unlinked">Ongekoppeld</option>';
+  (zaken || []).forEach(function(z) {
+    h += '<option value="' + z.id + '">' + esc(z.naam) + '</option>';
+  });
+  h += '</select>';
+  h += '<select id="emailRichtingFilter" style="background:var(--bg);border:1px solid var(--glass-bd);border-radius:var(--rs);padding:8px;color:var(--tx);font:13px var(--font)">';
+  h += '<option value="">Alle richtingen</option><option value="inkomend">Inkomend</option><option value="uitgaand">Uitgaand</option>';
+  h += '</select>';
+  h += '<button class="btn btn-blue btn-sm" onclick="searchEmails()"><span class="mi">search</span></button>';
+  h += '</div>';
+
+  // Email list placeholder
+  h += '<div id="emailList"><div class="loading"><div class="spinner"></div></div></div>';
+  h += '<div id="emailPagination" style="margin-top:12px;display:flex;gap:8px;justify-content:center"></div>';
+
+  app.innerHTML = h;
+  _emailPage = 1;
+  _emailFilter = {};
+  loadEmailList();
+}
+
+function searchEmails() {
+  _emailPage = 1;
+  _emailFilter = {};
+  var q = document.getElementById('emailSearch');
+  var zaak = document.getElementById('emailZaakFilter');
+  var richting = document.getElementById('emailRichtingFilter');
+  if (q && q.value) _emailFilter.q = q.value;
+  if (zaak && zaak.value === '__unlinked') _emailFilter.unlinked = '1';
+  else if (zaak && zaak.value) _emailFilter.zaak_id = zaak.value;
+  if (richting && richting.value) _emailFilter.richting = richting.value;
+  loadEmailList();
+}
+
+function loadEmailList() {
+  var el = document.getElementById('emailList');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  var params = 'page=' + _emailPage + '&per_page=30';
+  if (_emailFilter.q) params += '&q=' + encodeURIComponent(_emailFilter.q);
+  if (_emailFilter.zaak_id) params += '&zaak_id=' + encodeURIComponent(_emailFilter.zaak_id);
+  if (_emailFilter.richting) params += '&richting=' + encodeURIComponent(_emailFilter.richting);
+  if (_emailFilter.unlinked) params += '&unlinked=1';
+
+  apiFetch('/emails?' + params, function(err, data) {
+    if (err || !data) { el.innerHTML = '<p style="color:var(--tx3)">Fout bij laden</p>'; return; }
+
+    if (!data.emails || !data.emails.length) {
+      el.innerHTML = '<div class="card" style="padding:32px;text-align:center;color:var(--tx3)">' +
+        '<span class="mi" style="font-size:48px;display:block;margin-bottom:8px">mail</span>' +
+        '<p>Geen e-mails gevonden.</p>' +
+        '<p style="font-size:12px">Klik op "Synchroniseer vanuit Outlook" om je e-mails op te halen.</p></div>';
+      return;
+    }
+
+    var h = '';
+    data.emails.forEach(function(em) {
+      var richtingIcon = em.richting === 'uitgaand' ? '<span class="mi" style="color:var(--purple);font-size:14px" title="Uitgaand">north_east</span>' : '<span class="mi" style="color:var(--blue);font-size:14px" title="Inkomend">south_west</span>';
+      var zaakBadge = em.zaak_naam ? '<span class="badge badge-green" style="font-size:10px">' + esc(em.zaak_naam) + '</span>' : '<span class="badge" style="font-size:10px;background:var(--glass);color:var(--tx3)">ongekoppeld</span>';
+      var datumStr = em.datum_str || '';
+      var bijlagenIcon = em.heeft_bijlagen ? ' <span class="mi" style="font-size:13px;color:var(--tx3)" title="Bijlagen">attach_file</span>' : '';
+
+      h += '<div class="card" style="margin-bottom:6px;padding:10px 16px;cursor:pointer" onclick="go(\'/email/' + em.id + '\')">';
+      h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">';
+      h += '<div style="flex:1;min-width:0">';
+      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">';
+      h += richtingIcon;
+      h += '<span style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(em.onderwerp || '(geen onderwerp)') + '</span>';
+      h += bijlagenIcon;
+      h += '</div>';
+      h += '<div style="font-size:12px;color:var(--tx3)">';
+      h += '<span>' + esc(em.van_naam || em.van_email || '') + '</span>';
+      if (em.aan && em.aan.length) h += ' <span class="mi" style="font-size:11px">arrow_forward</span> <span>' + esc(em.aan[0]) + (em.aan.length > 1 ? ' +' + (em.aan.length-1) : '') + '</span>';
+      h += '</div>';
+      h += '</div>';
+      h += '<div style="text-align:right;flex-shrink:0">';
+      h += '<div style="font-size:11px;color:var(--tx3)">' + datumStr + '</div>';
+      h += '<div style="margin-top:4px">' + zaakBadge + '</div>';
+      h += '</div>';
+      h += '</div>';
+      if (em.body_preview) h += '<div style="font-size:11px;color:var(--tx3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(em.body_preview.substring(0, 150)) + '</div>';
+      h += '</div>';
+    });
+    el.innerHTML = h;
+
+    // Pagination
+    var pg = document.getElementById('emailPagination');
+    if (pg && data.pages > 1) {
+      var ph = '';
+      if (_emailPage > 1) ph += '<button class="btn btn-ghost btn-sm" onclick="_emailPage--;loadEmailList()">Vorige</button>';
+      ph += '<span style="font-size:12px;color:var(--tx3);padding:6px">Pagina ' + data.page + ' van ' + data.pages + ' (' + data.total + ' e-mails)</span>';
+      if (_emailPage < data.pages) ph += '<button class="btn btn-ghost btn-sm" onclick="_emailPage++;loadEmailList()">Volgende</button>';
+      pg.innerHTML = ph;
+    } else if (pg) {
+      pg.innerHTML = '<span style="font-size:12px;color:var(--tx3)">' + data.total + ' e-mails</span>';
+    }
+  });
+}
+
+function syncEmails() {
+  toast('E-mails synchroniseren vanuit Outlook...');
+  apiFetch('/emails/sync', { method: 'POST', body: {} }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (data && data.error ? data.error : err || 'Onbekende fout')); return; }
+    toast(data.new_saved + ' nieuwe e-mails opgeslagen, ' + data.total_in_db + ' totaal in database');
+    pgEmails();
+  });
+}
+
+function autoLinkEmails() {
+  toast('E-mails automatisch koppelen aan zaken...');
+  apiFetch('/emails/auto-link', { method: 'POST' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (data && data.error ? data.error : err)); return; }
+    toast(data.total_linked + ' e-mails gekoppeld aan zaken');
+    pgEmails();
+  });
+}
+
+// ---- E-MAIL DETAIL PAGINA ----
+function pgEmailDetail(emailId) {
+  var app = document.getElementById('app');
+  app.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  var emailData = null, zakenData = null;
+  var done = 0;
+  function check() {
+    done++;
+    if (done >= 2) renderEmailDetail(emailData, zakenData);
+  }
+  apiFetch('/emails/' + emailId, function(err, data) { emailData = data; check(); });
+  apiFetch('/zaken', function(err, data) { zakenData = data || []; check(); });
+}
+
+function renderEmailDetail(em, zaken) {
+  var app = document.getElementById('app');
+  if (!em || em.error) { app.innerHTML = '<p>E-mail niet gevonden</p>'; return; }
+
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
+  h += '<div class="section-title" style="margin-bottom:0"><span class="mi">email</span> ' + esc(em.onderwerp || '(geen onderwerp)') + '</div>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="go(\'/emails\')">Terug</button>';
+  h += '</div>';
+
+  // Meta info card
+  h += '<div class="card" style="padding:16px;margin-bottom:16px">';
+  h += '<div style="display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:13px">';
+  h += '<span style="color:var(--tx3)">Van:</span><span><strong>' + esc(em.van_naam || '') + '</strong> &lt;' + esc(em.van_email || '') + '&gt;</span>';
+  h += '<span style="color:var(--tx3)">Aan:</span><span>' + esc((em.aan || []).join(', ')) + '</span>';
+  if (em.cc && em.cc.length) h += '<span style="color:var(--tx3)">CC:</span><span>' + esc(em.cc.join(', ')) + '</span>';
+  h += '<span style="color:var(--tx3)">Datum:</span><span>' + esc(em.datum_str || '') + '</span>';
+  h += '<span style="color:var(--tx3)">Richting:</span><span>' + (em.richting === 'uitgaand' ? '<span class="mi" style="font-size:14px;color:var(--purple)">north_east</span> Uitgaand' : '<span class="mi" style="font-size:14px;color:var(--blue)">south_west</span> Inkomend') + '</span>';
+  if (em.heeft_bijlagen) h += '<span style="color:var(--tx3)">Bijlagen:</span><span><span class="mi" style="font-size:14px">attach_file</span> Ja</span>';
+  h += '</div>';
+  h += '</div>';
+
+  // Zaak koppeling
+  h += '<div class="card" style="padding:12px 16px;margin-bottom:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
+  h += '<span style="font-size:13px;color:var(--tx3)"><span class="mi" style="font-size:16px">link</span> Zaak:</span>';
+  h += '<select id="emailZaakLink" style="background:var(--bg);border:1px solid var(--glass-bd);border-radius:var(--rs);padding:6px 10px;color:var(--tx);font:13px var(--font);flex:1;min-width:200px">';
+  h += '<option value="">— Niet gekoppeld —</option>';
+  (zaken || []).forEach(function(z) {
+    h += '<option value="' + z.id + '"' + (em.zaak_id === z.id ? ' selected' : '') + '>' + esc(z.naam) + '</option>';
+  });
+  h += '</select>';
+  h += '<button class="btn btn-blue btn-sm" onclick="linkEmailToZaak(\'' + em.id + '\')"><span class="mi">save</span> Opslaan</button>';
+  h += '</div>';
+
+  // Body
+  h += '<div class="card" style="padding:16px">';
+  if (em.body_html) {
+    h += '<div style="font-size:13px;line-height:1.6;max-height:600px;overflow-y:auto" class="email-body-html">' + em.body_html + '</div>';
+  } else if (em.body_text) {
+    h += '<pre style="font-size:12px;line-height:1.5;white-space:pre-wrap;color:var(--tx2);max-height:600px;overflow-y:auto">' + esc(em.body_text) + '</pre>';
+  } else {
+    h += '<p style="color:var(--tx3)">Geen inhoud beschikbaar</p>';
+  }
+  h += '</div>';
+
+  app.innerHTML = h;
+}
+
+function linkEmailToZaak(emailId) {
+  var sel = document.getElementById('emailZaakLink');
+  var zaakId = sel ? sel.value : '';
+  apiFetch('/emails/' + emailId + '/link', { method: 'POST', body: { zaak_id: zaakId } }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout: ' + (data && data.error ? data.error : err)); return; }
+    toast(zaakId ? 'E-mail gekoppeld aan zaak' : 'E-mail ontkoppeld');
+    pgEmailDetail(emailId);
+  });
+}
+
+// ---- INSTELLINGEN ----
+function pgInstellingen() {
+  var app = document.getElementById('app');
+  app.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  apiFetch('/settings', function(err, s) {
+    if (err) { app.innerHTML = '<p>Fout</p>'; return; }
+    var h = '<div class="section-title"><span class="mi">settings</span> Instellingen</div>';
+
+    // Ollama
+    h += '<div class="card" style="max-width:600px;margin-bottom:16px">';
+    h += '<h3 style="font-size:15px;margin-bottom:12px"><span class="mi" style="color:var(--green)">smart_toy</span> Ollama (Lokale AI)</h3>';
+    h += '<div class="form-group"><label class="form-label">URL</label><input class="form-input" id="setOllamaUrl" value="' + esc(s.ollama_url) + '"></div>';
+    h += '<div class="form-group"><label class="form-label">Model</label><input class="form-input" id="setOllamaModel" value="' + esc(s.ollama_model) + '" placeholder="llama3.1"></div>';
+    h += '</div>';
+
+    // Cloud AI
+    h += '<div class="card" style="max-width:600px;margin-bottom:16px">';
+    h += '<h3 style="font-size:15px;margin-bottom:12px"><span class="mi" style="color:var(--purple)">cloud</span> Cloud AI (geanonimiseerde analyse)</h3>';
+    h += '<div class="form-group"><label class="form-label">Provider</label><select class="form-input" id="setProvider"><option value="openai"' + (s.ai_provider==='openai'?' selected':'') + '>OpenAI</option><option value="anthropic"' + (s.ai_provider==='anthropic'?' selected':'') + '>Anthropic</option></select></div>';
+    h += '<div class="form-group"><label class="form-label">Model</label><input class="form-input" id="setAiModel" value="' + esc(s.ai_model) + '" placeholder="gpt-4o"></div>';
+    h += '<div class="form-group"><label class="form-label">OpenAI API Key</label><input class="form-input" id="setOpenaiKey" type="password" value="' + esc(s.openai_api_key) + '"></div>';
+    h += '<div class="form-group"><label class="form-label">Anthropic API Key</label><input class="form-input" id="setAnthropicKey" type="password" value="' + esc(s.anthropic_api_key) + '"></div>';
+    h += '</div>';
+
+    // Meldpunt
+    h += '<div class="card" style="max-width:600px;margin-bottom:16px">';
+    h += '<h3 style="font-size:15px;margin-bottom:12px"><span class="mi" style="color:var(--red)">flag</span> Meldpunt Ambtenaren</h3>';
+    h += '<div class="form-group"><label class="form-label">API URL</label><input class="form-input" id="setMeldpuntUrl" value="' + esc(s.meldpunt_url) + '"></div>';
+    h += '</div>';
+
+    // Microsoft Outlook
+    h += '<div class="card" style="max-width:600px;margin-bottom:16px">';
+    h += '<h3 style="font-size:15px;margin-bottom:12px"><span class="mi" style="color:var(--purple)">email</span> Microsoft Outlook (e-mail zoeken)</h3>';
+    h += '<p style="font-size:12px;color:var(--tx3);margin-bottom:12px">Koppel uw Hotmail/Outlook account om e-mails te doorzoeken per zaak. Vereist een Azure App-registratie.</p>';
+    h += '<div class="form-group"><label class="form-label">Microsoft Client ID <span style="color:var(--tx3);font-weight:400">(Application ID uit Azure Portal)</span></label>';
+    h += '<input class="form-input" id="setMsClientId" value="' + esc(s.ms_client_id || '') + '" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>';
+    h += '<div id="outlookStatus" style="margin-bottom:12px"></div>';
+    h += '<div id="outlookActions" style="display:flex;gap:8px;flex-wrap:wrap"></div>';
+    h += '<div id="outlookDeviceFlow" style="margin-top:12px;display:none"></div>';
+    h += '</div>';
+
+    // Save + test
+    h += '<div style="display:flex;gap:8px;margin-bottom:24px">';
+    h += '<button class="btn btn-blue" onclick="saveSettings()"><span class="mi">save</span> Opslaan</button>';
+    h += '<button class="btn btn-ghost" onclick="testConnections()"><span class="mi">network_check</span> Test verbindingen</button>';
+    h += '</div>';
+    h += '<div id="testResults" style="margin-bottom:24px"></div>';
+
+    // ---- DATABASE MIGRATIE ----
+    h += '<div class="section-title" style="margin-top:16px"><span class="mi">storage</span> Database Migratie</div>';
+    h += '<div class="card" style="max-width:700px;margin-bottom:16px">';
+    h += '<h3 style="font-size:15px;margin-bottom:4px"><span class="mi" style="color:var(--accent)">swap_horiz</span> SQLite &rarr; Microsoft SQL Server</h3>';
+    h += '<p style="font-size:12px;color:var(--tx3);margin-bottom:16px">Kopieer alle gegevens van de lokale SQLite database naar uw SQL Server. De SQLite database blijft intact als backup.</p>';
+
+    h += '<div class="form-group"><label class="form-label">Server</label><input class="form-input" id="migServer" value="localhost" placeholder="localhost of servernaam\\instance"></div>';
+    h += '<div class="form-group"><label class="form-label">Database</label><input class="form-input" id="migDatabase" value="JuridischAssistent" placeholder="Databasenaam"></div>';
+    h += '<div class="form-group"><label class="form-label">Authenticatie</label>';
+    h += '<select class="form-input" id="migAuth" onchange="toggleMigAuth()">';
+    h += '<option value="windows">Windows Authentication (Trusted Connection)</option>';
+    h += '<option value="sql">SQL Server Authentication (gebruikersnaam + wachtwoord)</option>';
+    h += '</select></div>';
+    h += '<div id="migSqlAuth" style="display:none">';
+    h += '<div class="form-group"><label class="form-label">Gebruikersnaam</label><input class="form-input" id="migUser" placeholder="sa"></div>';
+    h += '<div class="form-group"><label class="form-label">Wachtwoord</label><input class="form-input" id="migPass" type="password"></div>';
+    h += '</div>';
+
+    h += '<div id="migDriverInfo" style="margin-bottom:12px"></div>';
+
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    h += '<button class="btn btn-ghost" onclick="checkMigrateReqs()"><span class="mi">check_circle</span> Controleer vereisten</button>';
+    h += '<button class="btn btn-ghost" onclick="testMigrateConn()"><span class="mi">cable</span> Test verbinding</button>';
+    h += '<button class="btn btn-blue" onclick="startMigration()"><span class="mi">rocket_launch</span> Start migratie</button>';
+    h += '<button class="btn btn-ghost" onclick="exportSqlDump()"><span class="mi">download</span> SQL dump exporteren</button>';
+    h += '</div>';
+    h += '<div id="migResults" style="margin-top:16px"></div>';
+    h += '</div>';
+
+    app.innerHTML = h;
+
+    // Check migration requirements on load
+    checkMigrateReqs();
+    // Load Outlook status
+    loadOutlookStatus();
+  });
+}
+
+function toggleMigAuth() {
+  var auth = document.getElementById('migAuth').value;
+  document.getElementById('migSqlAuth').style.display = auth === 'sql' ? 'block' : 'none';
+}
+
+function getMigConfig() {
+  return {
+    server: document.getElementById('migServer').value,
+    database: document.getElementById('migDatabase').value,
+    auth_type: document.getElementById('migAuth').value,
+    username: (document.getElementById('migUser') || {}).value || '',
+    password: (document.getElementById('migPass') || {}).value || '',
+  };
+}
+
+function checkMigrateReqs() {
+  var el = document.getElementById('migDriverInfo');
+  if (!el) return;
+  el.innerHTML = '<span class="spinner" style="width:14px;height:14px"></span> Controleren...';
+  apiFetch('/migrate/check', function(err, data) {
+    if (err) { el.innerHTML = '<p style="color:var(--red);font-size:12px">Fout: ' + esc(err) + '</p>'; return; }
+    var h = '';
+    if (data.ready) {
+      h += '<div style="font-size:12px;color:var(--green);padding:8px 12px;background:var(--green-soft);border-radius:var(--rs)">';
+      h += '<span class="mi mi-sm">check_circle</span> Klaar voor migratie. ';
+      if (data.odbc_drivers && data.odbc_drivers.length) {
+        var sqlDrivers = data.odbc_drivers.filter(function(d){ return d.indexOf('SQL Server') !== -1; });
+        h += 'ODBC drivers: ' + sqlDrivers.join(', ');
+      }
+      h += '</div>';
+    } else {
+      h += '<div style="font-size:12px;color:var(--red);padding:8px 12px;background:var(--red-soft);border-radius:var(--rs)">';
+      h += '<span class="mi mi-sm">error</span> Niet gereed:<br>';
+      data.issues.forEach(function(i) { h += '&bull; ' + esc(i) + '<br>'; });
+      h += '</div>';
+    }
+    el.innerHTML = h;
+  });
+}
+
+function testMigrateConn() {
+  var el = document.getElementById('migResults');
+  el.innerHTML = '<span class="spinner"></span> Verbinding testen...';
+  apiFetch('/migrate/test', { method: 'POST', body: getMigConfig() }, function(err, data) {
+    if (err) { el.innerHTML = '<p style="color:var(--red);font-size:13px">Fout: ' + esc(err) + '</p>'; return; }
+    if (data.success) {
+      el.innerHTML = '<div class="card" style="padding:12px 16px;border-color:var(--green)">' +
+        '<div style="font-size:13px;color:var(--green);margin-bottom:4px"><span class="mi mi-sm">check_circle</span> Verbinding geslaagd!</div>' +
+        '<div style="font-size:12px;color:var(--tx2)">' + esc(data.version) + '</div>' +
+        '<div style="font-size:12px;color:var(--tx3)">Database: ' + esc(data.database) + '</div>' +
+        '</div>';
+    } else {
+      el.innerHTML = '<div class="card" style="padding:12px 16px;border-color:var(--red)">' +
+        '<div style="font-size:13px;color:var(--red)"><span class="mi mi-sm">error</span> Verbinding mislukt</div>' +
+        '<div style="font-size:12px;color:var(--tx2);margin-top:4px">' + esc(data.error) + '</div>' +
+        '</div>';
+    }
+  });
+}
+
+function startMigration() {
+  if (!confirm('Weet u zeker dat u de migratie wilt starten?\n\nDit kopieert alle data naar SQL Server.\nBestaande tabellen in de SQL Server database worden overschreven.\nDe lokale SQLite database blijft ongewijzigd als backup.')) return;
+
+  var el = document.getElementById('migResults');
+  el.innerHTML = '<div style="text-align:center;padding:24px"><div class="spinner" style="width:32px;height:32px;border-width:3px"></div><div style="margin-top:12px;font-size:13px;color:var(--tx2)">Migratie bezig... Dit kan even duren.</div></div>';
+
+  apiFetch('/migrate/start', { method: 'POST', body: getMigConfig() }, function(err, data) {
+    if (err) { el.innerHTML = '<p style="color:var(--red);font-size:13px">Fout: ' + esc(err) + '</p>'; return; }
+
+    var h = '<div class="card" style="padding:16px 20px">';
+    if (data.success) {
+      h += '<div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:12px"><span class="mi">check_circle</span> Migratie geslaagd!</div>';
+      h += '<div style="font-size:13px;color:var(--tx2);margin-bottom:8px">Totaal ' + data.total_rows + ' rijen gekopieerd.</div>';
+    } else {
+      h += '<div style="font-size:15px;font-weight:700;color:var(--red);margin-bottom:12px"><span class="mi">error</span> Migratie mislukt</div>';
+    }
+
+    // Per-table results
+    if (data.tables) {
+      h += '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px">';
+      h += '<tr style="color:var(--tx3);text-align:left"><th style="padding:6px 8px">Tabel</th><th style="padding:6px 8px">Rijen</th><th style="padding:6px 8px">Status</th></tr>';
+      Object.keys(data.tables).forEach(function(t) {
+        var info = data.tables[t];
+        var color = info.status === 'ok' ? 'var(--green)' : info.status === 'leeg' ? 'var(--tx3)' : 'var(--red)';
+        h += '<tr><td style="padding:6px 8px;color:var(--tx)">' + esc(t) + '</td>';
+        h += '<td style="padding:6px 8px;color:var(--tx2)">' + info.rows + '</td>';
+        h += '<td style="padding:6px 8px;color:' + color + '">' + esc(info.status) + '</td></tr>';
+      });
+      h += '</table>';
+    }
+
+    // Errors
+    if (data.errors && data.errors.length) {
+      h += '<div style="margin-top:12px;padding:8px 12px;background:var(--red-soft);border-radius:var(--rs);font-size:12px;color:var(--red)">';
+      h += '<strong>Fouten:</strong><br>';
+      data.errors.forEach(function(e) { h += '&bull; ' + esc(e) + '<br>'; });
+      h += '</div>';
+    }
+
+    h += '</div>';
+    el.innerHTML = h;
+  });
+}
+
+function exportSqlDump() {
+  var el = document.getElementById('migResults');
+  el.innerHTML = '<span class="spinner"></span> Exporteren...';
+  apiFetch('/migrate/export', { method: 'POST' }, function(err, data) {
+    if (err) { el.innerHTML = '<p style="color:var(--red);font-size:13px">Fout: ' + esc(err) + '</p>'; return; }
+    if (data.ok) {
+      el.innerHTML = '<div class="card" style="padding:12px 16px;border-color:var(--green)">' +
+        '<div style="font-size:13px;color:var(--green)"><span class="mi mi-sm">check_circle</span> SQL dump geexporteerd!</div>' +
+        '<div style="font-size:12px;color:var(--tx2);margin-top:4px">Bestand: ' + esc(data.file) + '</div>' +
+        '</div>';
+    } else {
+      el.innerHTML = '<p style="color:var(--red);font-size:13px">Fout: ' + esc(data.error) + '</p>';
+    }
+  });
+}
+
+function saveSettings() {
+  apiFetch('/settings', { method: 'PUT', body: {
+    ollama_url: document.getElementById('setOllamaUrl').value,
+    ollama_model: document.getElementById('setOllamaModel').value,
+    ai_provider: document.getElementById('setProvider').value,
+    ai_model: document.getElementById('setAiModel').value,
+    openai_api_key: document.getElementById('setOpenaiKey').value,
+    anthropic_api_key: document.getElementById('setAnthropicKey').value,
+    meldpunt_url: document.getElementById('setMeldpuntUrl').value,
+    ms_client_id: document.getElementById('setMsClientId').value,
+  }}, function(err, data, ok) {
+    if (err || !ok) { toast('Fout bij opslaan'); return; }
+    toast('Instellingen opgeslagen!');
+    // Ververs Outlook status na opslaan
+    loadOutlookStatus();
+  });
+}
+
+function testConnections() {
+  var el = document.getElementById('testResults');
+  el.innerHTML = '<div class="spinner"></div> Testen...';
+  apiFetch('/health', function(err, h) {
+    if (err) { el.innerHTML = '<p style="color:var(--red)">Fout: ' + esc(err) + '</p>'; return; }
+    var lines = [];
+    lines.push('<span class="status-dot ' + (h.ollama.available?'dot-green':'dot-red') + '"></span> <strong>Ollama:</strong> ' + (h.ollama.available ? 'Verbonden (' + (h.ollama.models||[]).join(', ') + ')' : 'Niet bereikbaar'));
+    lines.push('<span class="status-dot ' + (h.cloud_ai.has_key?'dot-green':'dot-yellow') + '"></span> <strong>Cloud AI:</strong> ' + (h.cloud_ai.has_key ? h.cloud_ai.provider + ' / ' + h.cloud_ai.model : 'Geen API key ingesteld'));
+    lines.push('<span class="status-dot ' + (h.meldpunt.available?'dot-green':'dot-red') + '"></span> <strong>Meldpunt:</strong> ' + (h.meldpunt.available ? 'Bereikbaar' : 'Niet bereikbaar'));
+    lines.push('<span class="status-dot ' + (h.document_processing.pdf?'dot-green':'dot-red') + '"></span> <strong>PDF:</strong> ' + (h.document_processing.pdf ? 'OK' : 'pdfplumber niet geinstalleerd'));
+    lines.push('<span class="status-dot ' + (h.document_processing.ocr?'dot-green':'dot-red') + '"></span> <strong>OCR:</strong> ' + (h.document_processing.ocr ? 'OK' + (h.document_processing.tesseract_nld ? ' (NL)' : ' (geen NL taal)') : 'Tesseract niet geinstalleerd'));
+    if (h.outlook) {
+      lines.push('<span class="status-dot ' + (h.outlook.connected?'dot-green':'dot-gray') + '"></span> <strong>Outlook:</strong> ' + (h.outlook.connected ? 'Verbonden' : 'Niet verbonden'));
+    }
+    el.innerHTML = '<div class="card" style="padding:12px 16px;font-size:13px;line-height:2">' + lines.join('<br>') + '</div>';
+  });
+}
+
+// ---- OUTLOOK KOPPELING ----
+var _outlookAbortCtrl = null;
+
+function loadOutlookStatus() {
+  var statusEl = document.getElementById('outlookStatus');
+  var actionsEl = document.getElementById('outlookActions');
+  if (!statusEl || !actionsEl) return;
+
+  statusEl.innerHTML = '<span class="spinner" style="width:14px;height:14px"></span>';
+  actionsEl.innerHTML = '';
+
+  apiFetch('/outlook/status', function(err, data, ok) {
+    if (err || !ok) {
+      statusEl.innerHTML = '<div style="font-size:12px;color:var(--tx3)">Kon Outlook status niet ophalen</div>';
+      return;
+    }
+
+    if (data.connected) {
+      var profile = data.profile || {};
+      statusEl.innerHTML = '<div style="padding:10px 14px;background:var(--green-soft);border-radius:var(--rs);font-size:12px">' +
+        '<span class="status-dot dot-green"></span> <strong>Verbonden</strong>' +
+        (profile.name ? ' als ' + esc(profile.name) : '') +
+        (profile.email ? ' (' + esc(profile.email) + ')' : '') + '</div>';
+      actionsEl.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="disconnectOutlook()"><span class="mi">link_off</span> Ontkoppelen</button>';
+    } else if (!data.has_client_id) {
+      statusEl.innerHTML = '<div style="padding:10px 14px;background:var(--yellow-soft);border-radius:var(--rs);font-size:12px">' +
+        '<span class="status-dot dot-yellow"></span> Vul eerst een Client ID in en sla op. ' +
+        '<a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" style="color:var(--accent)">Azure Portal &rarr;</a></div>';
+      actionsEl.innerHTML = '';
+    } else {
+      statusEl.innerHTML = '<div style="padding:10px 14px;background:rgba(148,163,184,.08);border-radius:var(--rs);font-size:12px">' +
+        '<span class="status-dot dot-gray"></span> Niet verbonden</div>';
+      actionsEl.innerHTML = '<button class="btn btn-blue btn-sm" onclick="startOutlookAuth()"><span class="mi">login</span> Koppel Outlook</button>';
+    }
+  });
+}
+
+function startOutlookAuth() {
+  var flowEl = document.getElementById('outlookDeviceFlow');
+  if (!flowEl) return;
+  flowEl.style.display = 'block';
+  flowEl.innerHTML = '<div class="card" style="padding:16px;border-color:var(--accent)">' +
+    '<div class="spinner" style="margin:0 auto"></div>' +
+    '<p style="text-align:center;font-size:12px;color:var(--tx2);margin-top:8px">Device code ophalen...</p></div>';
+
+  apiFetch('/outlook/auth/start', { method: 'POST' }, function(err, data, ok) {
+    if (err || !ok || data.error) {
+      flowEl.innerHTML = '<div class="card" style="padding:16px;border-color:var(--red)">' +
+        '<p style="color:var(--red);font-size:13px"><span class="mi mi-sm">error</span> ' + esc(err || data.error || 'Onbekende fout') + '</p>' +
+        '<p style="font-size:11px;color:var(--tx3);margin-top:6px">Controleer of de Client ID klopt en sla eerst de instellingen op.</p></div>';
+      return;
+    }
+
+    var code = data.user_code || '???';
+    var uri = data.verification_uri || 'https://microsoft.com/devicelogin';
+
+    var h = '<div class="card" style="padding:20px;border-color:var(--accent);text-align:center">';
+    h += '<h4 style="font-size:14px;margin-bottom:12px"><span class="mi" style="color:var(--accent)">devices</span> Inloggen bij Microsoft</h4>';
+    h += '<p style="font-size:13px;color:var(--tx2);margin-bottom:16px">Open de link hieronder en voer de code in:</p>';
+    h += '<div style="background:var(--bg2);border:2px dashed var(--accent);border-radius:var(--rs);padding:20px;margin-bottom:16px">';
+    h += '<div style="font-size:32px;font-weight:800;letter-spacing:4px;color:var(--accent)">' + esc(code) + '</div>';
+    h += '</div>';
+    h += '<a href="' + esc(uri) + '" target="_blank" class="btn btn-blue" style="margin-bottom:12px"><span class="mi">open_in_new</span> ' + esc(uri) + '</a>';
+    h += '<div id="deviceFlowStatus" style="margin-top:12px">';
+    h += '<div class="spinner" style="width:16px;height:16px;display:inline-block;vertical-align:-3px"></div>';
+    h += ' <span style="font-size:12px;color:var(--tx3)">Wacht op aanmelding... (verloopt over ' + Math.round((data.expires_in || 900) / 60) + ' min)</span>';
+    h += '</div>';
+    h += '<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="cancelOutlookAuth()"><span class="mi">close</span> Annuleren</button>';
+    h += '</div>';
+    flowEl.innerHTML = h;
+
+    // Eén blokkerend verzoek — MSAL pollt intern tot de gebruiker inlogt
+    waitForDeviceFlowCompletion();
+  });
+}
+
+function waitForDeviceFlowCompletion() {
+  // MSAL's acquire_token_by_device_flow is blocking (pollt intern).
+  // We maken één langlopend request dat pas terugkomt als de gebruiker
+  // inlogt of de flow verloopt.
+  if (_outlookAbortCtrl) _outlookAbortCtrl.abort();
+  _outlookAbortCtrl = new AbortController();
+
+  fetch(API + '/outlook/auth/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal: _outlookAbortCtrl.signal,
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    _outlookAbortCtrl = null;
+    var statusEl = document.getElementById('deviceFlowStatus');
+
+    if (data.ok) {
+      // Succes!
+      var flowEl = document.getElementById('outlookDeviceFlow');
+      if (flowEl) {
+        flowEl.innerHTML = '<div class="card" style="padding:16px;border-color:var(--green);text-align:center">' +
+          '<span class="mi" style="font-size:32px;color:var(--green)">check_circle</span>' +
+          '<p style="font-size:14px;font-weight:600;color:var(--green);margin-top:8px">Outlook gekoppeld!</p></div>';
+        setTimeout(function() { flowEl.style.display = 'none'; }, 3000);
+      }
+      toast('Outlook succesvol gekoppeld!');
+      loadOutlookStatus();
+    } else if (statusEl) {
+      statusEl.innerHTML = '<p style="color:var(--red);font-size:12px"><span class="mi mi-sm">error</span> ' +
+        esc(data.error || 'Login mislukt of verlopen') + '</p>';
+    }
+  })
+  .catch(function(e) {
+    _outlookAbortCtrl = null;
+    if (e.name === 'AbortError') return; // Gebruiker heeft geannuleerd
+    var statusEl = document.getElementById('deviceFlowStatus');
+    if (statusEl) {
+      statusEl.innerHTML = '<p style="color:var(--red);font-size:12px"><span class="mi mi-sm">error</span> Verbinding mislukt: ' + esc(e.message) + '</p>';
+    }
+  });
+}
+
+function cancelOutlookAuth() {
+  if (_outlookAbortCtrl) { _outlookAbortCtrl.abort(); _outlookAbortCtrl = null; }
+  var flowEl = document.getElementById('outlookDeviceFlow');
+  if (flowEl) { flowEl.style.display = 'none'; flowEl.innerHTML = ''; }
+}
+
+function disconnectOutlook() {
+  if (!confirm('Weet u zeker dat u Outlook wilt ontkoppelen?')) return;
+  apiFetch('/outlook/disconnect', { method: 'POST' }, function(err, data, ok) {
+    if (err || !ok) { toast('Fout bij ontkoppelen'); return; }
+    toast('Outlook ontkoppeld');
+    loadOutlookStatus();
+  });
+}
+</script>
+</body>
+</html>

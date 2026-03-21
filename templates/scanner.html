@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Documentscanner — Juridisch Assistent</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='28' font-size='28'>&#x2696;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root {
+  --bg: #0a0e1a; --bg2: #111827; --bg3: #1e293b;
+  --surface: rgba(30,41,59,.65); --glass-bd: rgba(148,163,184,.15);
+  --tx: #f1f5f9; --tx2: #94a3b8; --tx3: #64748b;
+  --accent: #3b82f6; --accent2: #2563eb;
+  --red: #ef4444; --green: #22c55e; --yellow: #eab308;
+  --r: 14px; --rs: 8px;
+  --font: 'DM Sans', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--tx); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+.mi { font-family: 'Material Icons Round'; font-size: 20px; vertical-align: -4px; }
+
+/* Layout */
+.container { max-width: 600px; margin: 0 auto; padding: 16px; padding-bottom: 180px; }
+.header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.header h1 { font-size: 18px; font-weight: 800; }
+.header-sub { font-size: 12px; color: var(--tx3); }
+
+/* Form */
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--tx2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+.form-input { width: 100%; padding: 12px 14px; font-size: 16px; font-family: var(--font); background: var(--bg2); color: var(--tx); border: 1px solid var(--glass-bd); border-radius: var(--rs); outline: none; -webkit-appearance: none; }
+.form-input:focus { border-color: var(--accent); }
+select.form-input { padding-right: 32px; }
+
+/* Server config bar */
+.server-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--glass-bd); border-radius: var(--rs); }
+.server-bar input { flex: 1; background: transparent; border: none; color: var(--tx); font-size: 14px; font-family: var(--font); outline: none; }
+.server-bar .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.server-bar .dot-ok { background: var(--green); }
+.server-bar .dot-err { background: var(--red); }
+.server-bar .dot-wait { background: var(--yellow); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.server-bar button { background: var(--accent); color: #fff; border: none; padding: 6px 12px; border-radius: var(--rs); font-size: 13px; font-family: var(--font); font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+/* Thumbnail grid */
+.pages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 16px; min-height: 60px; }
+.page-thumb { position: relative; aspect-ratio: 3/4; border-radius: var(--rs); overflow: hidden; border: 2px solid var(--glass-bd); background: var(--bg2); touch-action: none; -webkit-user-select: none; user-select: none; }
+.page-thumb img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.page-thumb .page-num { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,.7); color: #fff; font-size: 11px; font-weight: 800; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.page-thumb .page-del { position: absolute; top: 4px; right: 4px; background: var(--red); color: #fff; border: none; font-size: 14px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Material Icons Round'; }
+.page-thumb.dragging { opacity: .4; border-color: var(--accent); }
+.page-thumb.over { border-color: var(--accent); border-style: dashed; }
+.page-thumb.touch-drag { opacity: .6; transform: scale(.95); transition: transform .15s; }
+
+/* Move buttons on thumbs */
+.page-thumb .page-move { position: absolute; bottom: 4px; background: rgba(0,0,0,.7); color: #fff; border: none; font-size: 16px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Material Icons Round'; }
+.page-thumb .page-move-left { left: 4px; }
+.page-thumb .page-move-right { right: 4px; }
+
+.empty-msg { text-align: center; padding: 40px 20px; color: var(--tx3); font-size: 14px; }
+.empty-msg .mi { font-size: 48px; display: block; margin-bottom: 8px; opacity: .4; }
+
+/* Page counter */
+.pages-info { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 13px; color: var(--tx3); }
+
+/* Bottom bar */
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 1px solid var(--glass-bd); padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+.btn-row { display: flex; gap: 8px; }
+.btn { flex: 1; padding: 14px; font-size: 15px; font-weight: 600; font-family: var(--font); border: none; border-radius: var(--rs); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity .2s; min-height: 48px; }
+.btn:active { opacity: .7; }
+.btn-blue { background: var(--accent); color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-ghost { background: transparent; color: var(--tx2); border: 1px solid var(--glass-bd); }
+.btn:disabled { opacity: .3; pointer-events: none; }
+.btn .mi { font-size: 20px; }
+
+/* Toast */
+.toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--bg3); color: var(--tx); padding: 10px 20px; border-radius: var(--r); font-size: 14px; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; max-width: 90vw; text-align: center; }
+.toast.show { opacity: 1; }
+
+/* Spinner */
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--glass-bd); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Status bar */
+.status { text-align: center; padding: 12px; font-size: 13px; color: var(--tx3); }
+.status .spinner { margin-right: 8px; vertical-align: -4px; }
+
+/* Compress indicator */
+.compress-info { font-size: 11px; color: var(--tx3); text-align: center; padding: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="mi" style="font-size:28px;color:var(--accent)">document_scanner</span>
+    <div>
+      <h1>Documentscanner</h1>
+      <div class="header-sub">Juridisch Assistent</div>
+    </div>
+  </div>
+
+  <!-- Server verbinding -->
+  <div class="server-bar" id="serverBar">
+    <span class="mi" style="font-size:16px;color:var(--tx3)">dns</span>
+    <input type="text" id="serverUrl" placeholder="http://192.168.x.x:5001" spellcheck="false">
+    <span class="dot dot-wait" id="serverDot"></span>
+    <button onclick="connectServer()">Verbind</button>
+  </div>
+
+  <!-- Zaak selectie -->
+  <div class="form-group">
+    <label>Opslaan in zaak</label>
+    <select class="form-input" id="zaakSelect" disabled>
+      <option value="">Verbind eerst met server...</option>
+    </select>
+  </div>
+
+  <!-- Bestandsnaam -->
+  <div class="form-group">
+    <label>Bestandsnaam</label>
+    <input class="form-input" id="filename" type="text" placeholder="bijv. scan_brief_gemeente">
+  </div>
+
+  <!-- Gescande pagina's -->
+  <div id="pagesContainer">
+    <div class="empty-msg" id="emptyMsg">
+      <span class="mi">document_scanner</span>
+      Nog geen pagina's gescand.<br>Klik hieronder om te beginnen.
+    </div>
+    <div class="pages-grid" id="pagesGrid" style="display:none"></div>
+  </div>
+
+  <div class="pages-info" id="pagesInfo" style="display:none">
+    <span id="pageCount">0 pagina's</span>
+    <button style="background:none;border:none;color:var(--red);font-size:13px;font-family:var(--font);cursor:pointer" onclick="clearAll()">Alles verwijderen</button>
+  </div>
+
+  <!-- Status -->
+  <div class="status" id="status" style="display:none"></div>
+</div>
+
+<!-- Camera input: GEEN multiple bij capture (iOS negeert capture anders) -->
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+<!-- Galerij: wel multiple, geen capture -->
+<input type="file" id="galleryInput" accept="image/*" multiple style="display:none">
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <div class="btn-row">
+    <button class="btn btn-blue" onclick="openCamera()">
+      <span class="mi">photo_camera</span> Camera
+    </button>
+    <button class="btn btn-ghost" onclick="openGallery()">
+      <span class="mi">photo_library</span> Galerij
+    </button>
+  </div>
+  <button class="btn btn-green" id="saveBtn" onclick="saveAsPdf()" disabled>
+    <span class="mi">picture_as_pdf</span> Opslaan als PDF
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+var API = '';
+var pages = [];  // { dataUrl, blob }
+var connected = false;
+
+// Max afmeting voor gecomprimeerde images (iPhone foto's zijn 4032x3024)
+var MAX_IMG_DIM = 2000;
+var JPEG_QUALITY = 0.82;
+
+// ---- Toast ----
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ---- Server verbinding ----
+function connectServer() {
+  var input = document.getElementById('serverUrl');
+  var url = input.value.trim();
+  if (!url) { toast('Voer een server adres in'); return; }
+
+  if (!url.startsWith('http')) url = 'http://' + url;
+  url = url.replace(/\/+$/, '');
+
+  if (location.protocol === 'https:' && url.startsWith('http://')) {
+    var dot = document.getElementById('serverDot');
+    dot.className = 'dot dot-err';
+    toast('HTTPS pagina kan niet verbinden met HTTP server. Open de scanner via: ' + url + '/scanner');
+    return;
+  }
+
+  var dot = document.getElementById('serverDot');
+  dot.className = 'dot dot-wait';
+
+  fetch(url + '/api/health', { mode: 'cors' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      API = url + '/api';
+      connected = true;
+      dot.className = 'dot dot-ok';
+      localStorage.setItem('ja_server_url', url);
+      toast('Verbonden!');
+      loadZaken();
+    })
+    .catch(function(e) {
+      dot.className = 'dot dot-err';
+      connected = false;
+      toast('Kan niet verbinden — controleer IP en of de app draait');
+    });
+}
+
+// ---- Laad zaken ----
+function loadZaken() {
+  if (!connected) return;
+  var sel = document.getElementById('zaakSelect');
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">Laden...</option>';
+
+  fetch(API + '/zaken')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      sel.innerHTML = '<option value="">— Selecteer een zaak —</option>';
+      data.forEach(function(z) {
+        var opt = document.createElement('option');
+        opt.value = z.id;
+        opt.textContent = z.naam + (z.folder_path ? '' : ' (geen map)');
+        if (!z.folder_path) opt.disabled = true;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(function() {
+      sel.innerHTML = '<option value="">Fout bij laden</option>';
+      toast('Kon zaken niet laden');
+    });
+}
+
+// ---- Image compressie ----
+// Verklein grote iPhone-foto's zodat de browser niet crasht
+function compressImage(file) {
+  return new Promise(function(resolve) {
+    // Kleine bestanden (< 500KB) niet comprimeren
+    if (file.size < 500000) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        resolve({ dataUrl: e.target.result, blob: file });
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function() {
+      URL.revokeObjectURL(url);
+      var w = img.width;
+      var h = img.height;
+
+      // Schaal af als groter dan MAX_IMG_DIM
+      if (w > MAX_IMG_DIM || h > MAX_IMG_DIM) {
+        if (w > h) {
+          h = Math.round(h * MAX_IMG_DIM / w);
+          w = MAX_IMG_DIM;
+        } else {
+          w = Math.round(w * MAX_IMG_DIM / h);
+          h = MAX_IMG_DIM;
+        }
+      }
+
+      var canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      canvas.toBlob(function(blob) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          resolve({ dataUrl: e.target.result, blob: blob });
+        };
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg', JPEG_QUALITY);
+    };
+    img.onerror = function() {
+      URL.revokeObjectURL(url);
+      // Fallback: gebruik origineel
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        resolve({ dataUrl: e.target.result, blob: file });
+      };
+      reader.readAsDataURL(file);
+    };
+    img.src = url;
+  });
+}
+
+// ---- Camera / Galerij ----
+function openCamera() {
+  // Recreëer input element (iOS bug: hergebruik werkt soms niet)
+  var old = document.getElementById('cameraInput');
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.id = 'cameraInput';
+  inp.accept = 'image/*';
+  inp.capture = 'environment';
+  inp.style.display = 'none';
+  inp.addEventListener('change', handleCameraFile);
+  old.parentNode.replaceChild(inp, old);
+  inp.click();
+}
+
+function openGallery() {
+  document.getElementById('galleryInput').click();
+}
+
+function handleCameraFile(e) {
+  var files = e.target.files;
+  if (!files || !files.length) return;
+  addPage(files[0]);
+}
+
+document.getElementById('galleryInput').addEventListener('change', function(e) {
+  var files = e.target.files;
+  if (!files || !files.length) return;
+  for (var i = 0; i < files.length; i++) {
+    addPage(files[i]);
+  }
+  e.target.value = '';
+});
+
+function addPage(file) {
+  toast('Verwerken...');
+  compressImage(file).then(function(result) {
+    pages.push({ dataUrl: result.dataUrl, blob: result.blob });
+    renderPages();
+    toast('Pagina ' + pages.length + ' toegevoegd');
+  });
+}
+
+// ---- Render pagina's ----
+function renderPages() {
+  var grid = document.getElementById('pagesGrid');
+  var empty = document.getElementById('emptyMsg');
+  var info = document.getElementById('pagesInfo');
+  var saveBtn = document.getElementById('saveBtn');
+
+  if (pages.length === 0) {
+    grid.style.display = 'none';
+    empty.style.display = '';
+    info.style.display = 'none';
+    saveBtn.disabled = true;
+    return;
+  }
+
+  empty.style.display = 'none';
+  grid.style.display = '';
+  info.style.display = '';
+  saveBtn.disabled = !connected;
+
+  document.getElementById('pageCount').textContent = pages.length + ' pagina' + (pages.length !== 1 ? "'s" : '');
+
+  grid.innerHTML = '';
+  pages.forEach(function(p, i) {
+    var div = document.createElement('div');
+    div.className = 'page-thumb';
+    div.dataset.index = i;
+
+    var html = '<img src="' + p.dataUrl + '" alt="Pagina ' + (i+1) + '">' +
+      '<span class="page-num">' + (i+1) + '</span>' +
+      '<button class="page-del" onclick="removePage(' + i + ')">close</button>';
+
+    // Verplaatsknoppen (touch-friendly alternatief voor drag & drop)
+    if (pages.length > 1) {
+      if (i > 0) {
+        html += '<button class="page-move page-move-left" onclick="movePage(' + i + ',-1)">chevron_left</button>';
+      }
+      if (i < pages.length - 1) {
+        html += '<button class="page-move page-move-right" onclick="movePage(' + i + ',1)">chevron_right</button>';
+      }
+    }
+
+    div.innerHTML = html;
+
+    // Desktop: HTML5 drag & drop
+    div.draggable = true;
+    div.addEventListener('dragstart', function(e) {
+      window._dragIdx = i;
+      div.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    div.addEventListener('dragend', function() {
+      div.classList.remove('dragging');
+      window._dragIdx = null;
+    });
+    div.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      div.classList.add('over');
+    });
+    div.addEventListener('dragleave', function() {
+      div.classList.remove('over');
+    });
+    div.addEventListener('drop', function(e) {
+      e.preventDefault();
+      div.classList.remove('over');
+      if (window._dragIdx !== null && window._dragIdx !== i) {
+        var item = pages.splice(window._dragIdx, 1)[0];
+        pages.splice(i, 0, item);
+        renderPages();
+      }
+    });
+
+    // Mobile: long-press + touch drag
+    setupTouchReorder(div, i);
+
+    grid.appendChild(div);
+  });
+}
+
+// ---- Touch reorder (iOS/Android) ----
+var touchState = { active: false, idx: null, timer: null };
+
+function setupTouchReorder(el, idx) {
+  el.addEventListener('touchstart', function(e) {
+    // Start long-press timer (300ms)
+    touchState.timer = setTimeout(function() {
+      touchState.active = true;
+      touchState.idx = idx;
+      el.classList.add('touch-drag');
+      // Haptic feedback als beschikbaar
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, 300);
+  }, { passive: true });
+
+  el.addEventListener('touchmove', function(e) {
+    // Cancel long-press als je meteen beweegt (is scrollen)
+    if (!touchState.active) {
+      clearTimeout(touchState.timer);
+      return;
+    }
+    e.preventDefault();
+    // Vind element onder vinger
+    var touch = e.touches[0];
+    var target = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (target) {
+      var thumb = target.closest('.page-thumb');
+      if (thumb) {
+        // Highlight drop target
+        document.querySelectorAll('.page-thumb.over').forEach(function(el) { el.classList.remove('over'); });
+        if (thumb.dataset.index != touchState.idx) {
+          thumb.classList.add('over');
+        }
+      }
+    }
+  }, { passive: false });
+
+  el.addEventListener('touchend', function(e) {
+    clearTimeout(touchState.timer);
+    if (!touchState.active) return;
+
+    // Vind drop target
+    var touch = e.changedTouches[0];
+    var target = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (target) {
+      var thumb = target.closest('.page-thumb');
+      if (thumb && thumb.dataset.index != touchState.idx) {
+        var fromIdx = touchState.idx;
+        var toIdx = parseInt(thumb.dataset.index);
+        var item = pages.splice(fromIdx, 1)[0];
+        pages.splice(toIdx, 0, item);
+        renderPages();
+      }
+    }
+
+    // Cleanup
+    document.querySelectorAll('.page-thumb.over, .page-thumb.touch-drag').forEach(function(el) {
+      el.classList.remove('over', 'touch-drag');
+    });
+    touchState.active = false;
+    touchState.idx = null;
+  }, { passive: true });
+
+  el.addEventListener('touchcancel', function() {
+    clearTimeout(touchState.timer);
+    touchState.active = false;
+    touchState.idx = null;
+    el.classList.remove('touch-drag');
+  }, { passive: true });
+}
+
+// ---- Verplaats pagina (knoppen) ----
+function movePage(idx, dir) {
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= pages.length) return;
+  var item = pages.splice(idx, 1)[0];
+  pages.splice(newIdx, 0, item);
+  renderPages();
+}
+
+function removePage(idx) {
+  pages.splice(idx, 1);
+  renderPages();
+}
+
+function clearAll() {
+  if (!confirm('Alle gescande pagina\'s verwijderen?')) return;
+  pages = [];
+  renderPages();
+}
+
+// ---- Opslaan als PDF ----
+function saveAsPdf() {
+  if (!connected) { toast('Verbind eerst met de server'); return; }
+  var zaakId = document.getElementById('zaakSelect').value;
+  if (!zaakId) { toast('Selecteer eerst een zaak'); return; }
+  if (pages.length === 0) { toast('Scan eerst pagina\'s'); return; }
+
+  var filename = document.getElementById('filename').value.trim();
+  if (!filename) {
+    var now = new Date();
+    filename = 'scan_' + now.getFullYear() +
+      ('0' + (now.getMonth()+1)).slice(-2) +
+      ('0' + now.getDate()).slice(-2) + '_' +
+      ('0' + now.getHours()).slice(-2) +
+      ('0' + now.getMinutes()).slice(-2);
+  }
+  if (!filename.toLowerCase().endsWith('.pdf')) filename += '.pdf';
+
+  var status = document.getElementById('status');
+  var saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  status.style.display = '';
+  status.innerHTML = '<div class="spinner"></div> PDF maken en uploaden (' + pages.length + ' pagina\'s)...';
+
+  var formData = new FormData();
+  formData.append('filename', filename);
+  formData.append('combine_pdf', 'true');
+  pages.forEach(function(p, i) {
+    formData.append('files', p.blob, 'page_' + (i+1) + '.jpg');
+  });
+
+  fetch(API + '/zaken/' + zaakId + '/upload', {
+    method: 'POST',
+    body: formData
+  })
+  .then(function(r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
+  .then(function(res) {
+    status.style.display = 'none';
+    if (!res.ok) {
+      toast('Fout: ' + (res.data.error || 'Upload mislukt'));
+      saveBtn.disabled = false;
+      return;
+    }
+    toast('PDF opgeslagen!');
+    status.innerHTML = '<span style="color:var(--green)"><span class="mi" style="font-size:16px">check_circle</span> ' +
+      res.data.filename + ' opgeslagen in zaakmap</span>';
+    status.style.display = '';
+    pages = [];
+    renderPages();
+    saveBtn.disabled = false;
+  })
+  .catch(function(e) {
+    status.style.display = 'none';
+    toast('Netwerkfout: ' + e.message);
+    saveBtn.disabled = false;
+  });
+}
+
+// ---- Init ----
+(function() {
+  var isLocal = (location.hostname !== '' &&
+    !location.hostname.endsWith('.github.io') &&
+    !location.hostname.endsWith('.pages.dev'));
+
+  if (isLocal) {
+    document.getElementById('serverBar').style.display = 'none';
+    var localUrl = location.protocol + '//' + location.host;
+    document.getElementById('serverUrl').value = localUrl;
+    connectServer();
+  } else {
+    var saved = localStorage.getItem('ja_server_url');
+    if (saved) {
+      document.getElementById('serverUrl').value = saved;
+      connectServer();
+    }
+  }
+
+  // Auto bestandsnaam
+  var now = new Date();
+  document.getElementById('filename').value = 'scan_' + now.getFullYear() +
+    ('0' + (now.getMonth()+1)).slice(-2) +
+    ('0' + now.getDate()).slice(-2);
+})();
+</script>
+</body>
+</html>
