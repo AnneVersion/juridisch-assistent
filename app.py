@@ -498,7 +498,19 @@ def zaken_by_folders():
         return jsonify({})
     result = {}
     for z in Zaak.query.filter(Zaak.folder_path.in_(paths)).all():
-        result[z.folder_path] = {'id': z.id, 'naam': z.naam, 'status': z.status, 'doc_count': z.documenten.count()}
+        deadline_reden = ''
+        try:
+            deadline_reden = getattr(z, 'deadline_reden', '') or ''
+        except:
+            pass
+        result[z.folder_path] = {
+            'id': z.id, 'naam': z.naam, 'status': z.status,
+            'doc_count': z.documenten.count(),
+            'omschrijving': z.omschrijving or '',
+            'deadline': z.deadline.isoformat() if z.deadline else None,
+            'deadline_reden': deadline_reden,
+            'procedure_type': z.procedure_type or '',
+        }
     return jsonify(result)
 
 
@@ -628,8 +640,11 @@ def scan_zaak_folder(zaak_id):
         return jsonify({'error': 'Zaakmap niet gevonden of niet ingesteld'}), 400
 
     files = scan_folder(zaak.folder_path)
-    existing_paths = {d.bestandspad for d in zaak.documenten.all()}
+    file_paths = {f['path'] for f in files}
+    existing_docs = zaak.documenten.all()
+    existing_paths = {d.bestandspad for d in existing_docs}
 
+    # Nieuwe bestanden toevoegen
     added = []
     for f in files:
         if f['path'] in existing_paths:
@@ -638,8 +653,47 @@ def scan_zaak_folder(zaak_id):
         db.session.add(doc)
         added.append(f['name'])
 
+    # Verwijderde/verplaatste bestanden uit database halen
+    removed = []
+    for doc in existing_docs:
+        if doc.bestandspad and doc.bestandspad not in file_paths:
+            if not os.path.isfile(doc.bestandspad):
+                removed.append(doc.bestandsnaam)
+                db.session.delete(doc)
+
     db.session.commit()
-    return jsonify({'ok': True, 'added': added, 'count': len(added)})
+
+    # Als er nieuwe documenten zijn: automatisch tekst extraheren
+    new_extracted = 0
+    if added:
+        for doc in zaak.documenten.filter(Document.extraction_done == False).all():
+            if os.path.isfile(doc.bestandspad):
+                try:
+                    text = extract_text(doc.bestandspad)
+                    meta = extract_metadata(text) if text else {}
+                    doc.extracted_text = text
+                    doc.extraction_done = True
+                    doc.metadata_json = meta
+                    # Auto-detect document type en datum uit bestandsnaam
+                    import re as _re
+                    date_match = _re.search(r'(\d{8})', doc.bestandsnaam)
+                    if date_match and not doc.doc_datum:
+                        ds = date_match.group(1)
+                        doc.doc_datum = f"{ds[:4]}-{ds[4:6]}-{ds[6:8]}"
+                    if not doc.doc_type:
+                        doc.doc_type = detect_type(doc.bestandspad)
+                    new_extracted += 1
+                except:
+                    pass
+        db.session.commit()
+
+    return jsonify({
+        'ok': True,
+        'added': added, 'added_count': len(added),
+        'removed': removed, 'removed_count': len(removed),
+        'extracted': new_extracted,
+        'needs_ai_refresh': len(added) > 0,
+    })
 
 
 @app.route('/api/documenten/<doc_id>', methods=['DELETE'])
@@ -715,10 +769,178 @@ def get_document_text(doc_id):
         return jsonify({'error': 'Document niet gevonden'}), 404
     return jsonify({
         'id': doc.id,
+        'zaak_id': doc.zaak_id,
         'bestandsnaam': doc.bestandsnaam,
+        'bestandspad': doc.bestandspad,
+        'bestandstype': doc.bestandstype,
         'extracted_text': doc.extracted_text or '',
         'extraction_done': doc.extraction_done,
         'metadata': doc.metadata_json or {},
+        'samenvatting': doc.samenvatting or '',
+        'doc_type': doc.doc_type or '',
+        'doc_datum': doc.doc_datum or '',
+        'doc_afzender': doc.doc_afzender or '',
+        'doc_ontvanger': doc.doc_ontvanger or '',
+        'doc_kenmerk': doc.doc_kenmerk or '',
+    })
+
+
+@app.route('/api/documenten/<doc_id>/file', methods=['GET'])
+def serve_document_file(doc_id):
+    """Serveer het originele bestand (PDF/image) voor preview."""
+    doc = Document.query.get(doc_id)
+    if not doc or not doc.bestandspad or not os.path.isfile(doc.bestandspad):
+        return 'Bestand niet gevonden', 404
+    directory = os.path.dirname(doc.bestandspad)
+    filename = os.path.basename(doc.bestandspad)
+    return send_from_directory(directory, filename)
+
+
+@app.route('/api/documenten/<doc_id>/chat', methods=['POST'])
+def chat_document(doc_id):
+    """AI chat over een specifiek document."""
+    doc = Document.query.get(doc_id)
+    if not doc:
+        return jsonify({'error': 'Document niet gevonden'}), 404
+
+    data = request.get_json(silent=True) or {}
+    vraag = data.get('vraag', '').strip()
+    if not vraag:
+        return jsonify({'error': 'Geen vraag'}), 400
+
+    # Bouw document context
+    doc_context = f"DOCUMENT: {doc.bestandsnaam}\n"
+    if doc.doc_type:
+        doc_context += f"Type: {doc.doc_type}\n"
+    if doc.doc_datum:
+        doc_context += f"Datum: {doc.doc_datum}\n"
+    if doc.doc_afzender:
+        doc_context += f"Van: {doc.doc_afzender}\n"
+    if doc.doc_ontvanger:
+        doc_context += f"Aan: {doc.doc_ontvanger}\n"
+    if doc.samenvatting:
+        doc_context += f"\nSAMENVATTING:\n{doc.samenvatting}\n"
+    if doc.extracted_text:
+        doc_context += f"\nVOLLEDIGE TEKST:\n{doc.extracted_text[:6000]}\n"
+
+    # Zaak context
+    zaak = Zaak.query.get(doc.zaak_id)
+    zaak_context = ''
+    if zaak and zaak.omschrijving:
+        zaak_context = f"\nZAAK CONTEXT:\n{zaak.omschrijving[:1000]}\n"
+
+    system_prompt = f"""Je bent een juridisch assistent die vragen beantwoordt over een specifiek document uit een rechtszaak.
+Geef concreet advies in het Nederlands. Verwijs naar relevante wetsartikelen als dat nuttig is.
+
+{doc_context}
+{zaak_context}"""
+
+    # Chat history
+    history = data.get('history', [])
+    messages = [{'role': m['role'], 'content': m['content']} for m in history[-8:] if m.get('role') in ('user', 'assistant')]
+    if not messages or messages[-1].get('content') != vraag:
+        messages.append({'role': 'user', 'content': vraag})
+
+    # AI call
+    ollama = get_ollama()
+    cloud = get_cloud_ai()
+
+    try:
+        if cloud.is_configured():
+            # Prefer cloud for better quality
+            import urllib.request as _ur
+            import json as _json
+            if cloud.provider == 'anthropic':
+                payload = _json.dumps({
+                    'model': cloud.model,
+                    'max_tokens': 2000,
+                    'system': system_prompt,
+                    'messages': messages,
+                }).encode()
+                req = _ur.Request(
+                    'https://api.anthropic.com/v1/messages',
+                    data=payload,
+                    headers={
+                        'Content-Type': 'application/json',
+                        'x-api-key': cloud.api_key,
+                        'anthropic-version': '2023-06-01',
+                    },
+                    method='POST'
+                )
+                resp = _ur.urlopen(req, timeout=120)
+                result = _json.loads(resp.read())
+                antwoord = result.get('content', [{}])[0].get('text', 'Geen antwoord')
+                return jsonify({'antwoord': antwoord, 'provider': 'anthropic', 'model': cloud.model})
+
+        if ollama.is_available():
+            import urllib.request as _ur
+            import json as _json
+            payload = _json.dumps({
+                'model': ollama.model,
+                'messages': [{'role': 'system', 'content': system_prompt}] + messages,
+                'stream': False,
+            }).encode()
+            req = _ur.Request(f"{ollama.base_url}/api/chat", data=payload,
+                              headers={'Content-Type': 'application/json'}, method='POST')
+            resp = _ur.urlopen(req, timeout=120)
+            result = _json.loads(resp.read())
+            antwoord = result.get('message', {}).get('content', 'Geen antwoord')
+            return jsonify({'antwoord': antwoord, 'provider': 'ollama', 'model': ollama.model})
+
+        return jsonify({'error': 'Geen AI beschikbaar'}), 400
+
+    except Exception as e:
+        return jsonify({'error': f'AI fout: {str(e)}'}), 500
+
+
+@app.route('/api/documenten/batch-copy', methods=['POST'])
+def batch_copy_documents():
+    """Kopieer geselecteerde documenten naar een andere map of nieuwe map."""
+    import shutil
+    data = request.get_json(silent=True) or {}
+    doc_ids = data.get('doc_ids', [])
+    target_path = data.get('target_path', '')
+    new_folder_name = data.get('new_folder_name', '')
+
+    if not doc_ids:
+        return jsonify({'error': 'Geen documenten geselecteerd'}), 400
+
+    # Bepaal doelmap
+    if new_folder_name:
+        # Maak nieuwe map aan in de hoofdmap
+        hoofdmap = Instelling.get('hoofdmap', '')
+        if not hoofdmap:
+            return jsonify({'error': 'Geen hoofdmap ingesteld'}), 400
+        target_path = os.path.join(hoofdmap, new_folder_name)
+        os.makedirs(target_path, exist_ok=True)
+    elif not target_path or not os.path.isdir(target_path):
+        return jsonify({'error': 'Doelmap niet gevonden'}), 404
+
+    copied = 0
+    errors = []
+    for doc_id in doc_ids:
+        doc = Document.query.get(doc_id)
+        if not doc or not doc.bestandspad or not os.path.isfile(doc.bestandspad):
+            errors.append(f'{doc_id}: bestand niet gevonden')
+            continue
+        try:
+            dest = os.path.join(target_path, os.path.basename(doc.bestandspad))
+            if os.path.exists(dest):
+                # Voeg nummer toe als bestand al bestaat
+                base, ext = os.path.splitext(dest)
+                i = 1
+                while os.path.exists(f"{base}_{i}{ext}"):
+                    i += 1
+                dest = f"{base}_{i}{ext}"
+            shutil.copy2(doc.bestandspad, dest)
+            copied += 1
+        except Exception as e:
+            errors.append(f'{doc.bestandsnaam}: {str(e)}')
+
+    return jsonify({
+        'copied': copied,
+        'errors': errors,
+        'target_path': target_path,
     })
 
 
@@ -1540,6 +1762,282 @@ def list_analyses(zaak_id):
     """Alle analyses van een zaak."""
     analyses = Analyse.query.filter_by(zaak_id=zaak_id).order_by(Analyse.created_at.desc()).all()
     return jsonify([a.to_dict() for a in analyses])
+
+
+@app.route('/api/zaken/<zaak_id>/ai-refresh', methods=['POST'])
+def ai_refresh_zaak(zaak_id):
+    """Volledige AI analyse: samenvatting, tijdlijn, personen, advies, jurisprudentie."""
+    import urllib.request as _ur
+    import json as _json
+    from datetime import datetime
+
+    zaak = Zaak.query.get(zaak_id)
+    if not zaak:
+        return jsonify({'error': 'Zaak niet gevonden'}), 404
+
+    # Verzamel ALLE document teksten (extracted of samenvattingen)
+    docs = zaak.documenten.order_by(Document.doc_datum).all()
+    doc_texts = []
+    for d in docs:
+        tekst = d.extracted_text or d.samenvatting or ''
+        if tekst.strip():
+            datum = d.doc_datum or d.file_modified or '?'
+            afzender = d.doc_afzender or '?'
+            ontvanger = d.doc_ontvanger or '?'
+            doc_texts.append(f"[{datum}] {d.bestandsnaam} (van: {afzender}, aan: {ontvanger}):\n{tekst[:1500]}")
+
+    if not doc_texts:
+        # Gebruik omschrijving als er geen teksten zijn
+        if zaak.omschrijving:
+            doc_texts = [zaak.omschrijving]
+        else:
+            return jsonify({'error': 'Geen documenten met tekst. Extraheer eerst de tekst.'}), 400
+
+    combined = '\n\n---\n\n'.join(doc_texts)
+
+    # Claude API call
+    cloud = get_cloud_ai()
+    api_key = ''
+    model = 'claude-sonnet-4-20250514'
+    if cloud.is_configured() and cloud.provider == 'anthropic':
+        api_key = cloud.api_key
+        model = cloud.model
+
+    if not api_key:
+        # Probeer uit instellingen
+        api_key = Instelling.get('anthropic_api_key', '')
+        model = Instelling.get('ai_model', 'claude-sonnet-4-20250514')
+
+    if not api_key:
+        return jsonify({'error': 'Geen Anthropic API key. Stel deze in via Instellingen.'}), 400
+
+    # Haal vorige analyse op voor vergelijking
+    vorige_samenvatting = ''
+    vorige_analyse = Analyse.query.filter_by(zaak_id=zaak_id, type='samenvatting').first()
+    if vorige_analyse and vorige_analyse.result_text:
+        vorige_samenvatting = vorige_analyse.result_text[:1000]
+
+    vorige_advies = ''
+    vorige_advies_obj = Analyse.query.filter_by(zaak_id=zaak_id, type='advies').first()
+    if vorige_advies_obj and vorige_advies_obj.result_text:
+        vorige_advies = vorige_advies_obj.result_text[:500]
+
+    prompt = f"""Analyseer deze rechtszaak volledig. Geef je antwoord als JSON met exact deze structuur:
+
+{{
+  "samenvatting": "Complete samenvatting van de zaak in 200-300 woorden",
+  "status": "Huidige status van de zaak (1 zin)",
+  "wat_is_veranderd": "Als er een vorige analyse was: wat is er sindsdien veranderd? Nieuwe documenten, nieuwe ontwikkelingen, gewijzigde situatie. Als dit de eerste analyse is: null",
+  "tijdlijn": [
+    {{"datum": "YYYY-MM-DD", "event": "Wat er is gebeurd", "persoon": "Wie betrokken (optioneel)"}}
+  ],
+  "personen": [
+    {{"naam": "Volledige naam", "organisatie": "Organisatie", "functie": "Functie/rol", "email": "email indien bekend", "overtredingen": "Beschrijving overtredingen of null"}}
+  ],
+  "juridische_analyse": {{
+    "wetsartikelen": ["Art. X Awb", "Art. Y AVG"],
+    "schendingen": ["Beschrijving van elke schending"],
+    "sterke_punten": ["Waar de zaak sterk staat"],
+    "zwakke_punten": ["Mogelijke risicos"],
+    "termijnen": [{{"termijn": "Beschrijving", "datum": "YYYY-MM-DD of onbekend", "status": "verlopen/lopend/aankomend", "actie": "Wat moet je doen"}}]
+  }},
+  "advies": {{
+    "vervolgstappen": [{{"stap": "Wat je moet doen", "deadline": "Wanneer", "waarom": "Waarom dit belangrijk is", "oplevert": "Wat het oplevert"}}],
+    "prioriteit": "Wat als EERSTE moet gebeuren en WAAROM",
+    "kansen": "Inschatting kans van slagen per onderdeel (laag/middel/hoog) met toelichting",
+    "risicos": "Wat er mis kan gaan als je NIETS doet"
+  }},
+  "vergelijkbare_zaken": [
+    {{"ecli": "ECLI nummer", "beschrijving": "Korte beschrijving", "uitkomst": "Wat de rechter besliste", "relevantie": "Waarom relevant voor jouw zaak", "les": "Wat je hiervan kunt leren"}}
+  ]
+}}
+
+{"VORIGE SAMENVATTING (vergelijk met huidige situatie):" + chr(10) + vorige_samenvatting + chr(10) + chr(10) if vorige_samenvatting else ""}{"VORIG ADVIES:" + chr(10) + vorige_advies + chr(10) + chr(10) if vorige_advies else ""}DOCUMENTEN:
+{combined[:8000]}"""
+
+    try:
+        payload = _json.dumps({
+            'model': model,
+            'max_tokens': 4000,
+            'messages': [{'role': 'user', 'content': prompt}],
+        }).encode()
+        req = _ur.Request(
+            'https://api.anthropic.com/v1/messages',
+            data=payload,
+            headers={
+                'Content-Type': 'application/json',
+                'x-api-key': api_key,
+                'anthropic-version': '2023-06-01',
+            },
+            method='POST'
+        )
+        resp = _ur.urlopen(req, timeout=180)
+        result = _json.loads(resp.read())
+        antwoord_tekst = result.get('content', [{}])[0].get('text', '')
+
+        # Parse JSON uit antwoord
+        # Zoek JSON block
+        json_match = antwoord_tekst
+        if '```json' in antwoord_tekst:
+            json_match = antwoord_tekst.split('```json')[1].split('```')[0]
+        elif '```' in antwoord_tekst:
+            json_match = antwoord_tekst.split('```')[1].split('```')[0]
+        # Probeer te parsen
+        try:
+            ai_result = _json.loads(json_match.strip())
+        except:
+            # Fallback: sla rauw antwoord op
+            ai_result = {'samenvatting': antwoord_tekst, 'raw': True}
+
+        # Sla resultaten op in database
+        now = datetime.now().isoformat()
+
+        # 1. Update zaak samenvatting
+        if ai_result.get('samenvatting'):
+            zaak.omschrijving = ai_result['samenvatting']
+            if ai_result.get('status'):
+                zaak.status = 'actief'
+
+        # 2. Sla analyses op
+        analyse_types = {
+            'samenvatting': ai_result.get('samenvatting', ''),
+            'wat_is_veranderd': ai_result.get('wat_is_veranderd', ''),
+            'tijdlijn': _json.dumps(ai_result.get('tijdlijn', []), ensure_ascii=False, indent=2) if ai_result.get('tijdlijn') else '',
+            'personen': _json.dumps(ai_result.get('personen', []), ensure_ascii=False, indent=2) if ai_result.get('personen') else '',
+            'juridische_analyse': _json.dumps(ai_result.get('juridische_analyse', {}), ensure_ascii=False, indent=2) if ai_result.get('juridische_analyse') else '',
+            'advies': _json.dumps(ai_result.get('advies', {}), ensure_ascii=False, indent=2) if ai_result.get('advies') else '',
+            'vergelijkbare_zaken': _json.dumps(ai_result.get('vergelijkbare_zaken', []), ensure_ascii=False, indent=2) if ai_result.get('vergelijkbare_zaken') else '',
+        }
+
+        for atype, tekst in analyse_types.items():
+            if not tekst:
+                continue
+            existing = Analyse.query.filter_by(zaak_id=zaak_id, type=atype).first()
+            if existing:
+                existing.result_text = tekst
+                existing.ai_provider = 'anthropic'
+                existing.ai_model = model
+                existing.created_at = datetime.now()
+            else:
+                a = Analyse(
+                    id=maak_id(),
+                    zaak_id=zaak_id,
+                    type=atype,
+                    result_text=tekst,
+                    ai_provider='anthropic',
+                    ai_model=model,
+                )
+                db.session.add(a)
+
+        db.session.commit()
+
+        return jsonify({
+            'status': 'OK',
+            'samenvatting': ai_result.get('samenvatting', ''),
+            'tijdlijn_count': len(ai_result.get('tijdlijn', [])),
+            'personen_count': len(ai_result.get('personen', [])),
+            'heeft_advies': bool(ai_result.get('advies')),
+            'heeft_jurisprudentie': bool(ai_result.get('vergelijkbare_zaken')),
+            'model': model,
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'AI fout: {str(e)}'}), 500
+
+
+@app.route('/api/zaken/<zaak_id>/chat', methods=['POST'])
+def chat_zaak(zaak_id):
+    """AI chat over een zaak. Stuurt zaak-context mee als system prompt."""
+    zaak = Zaak.query.get(zaak_id)
+    if not zaak:
+        return jsonify({'error': 'Zaak niet gevonden'}), 404
+
+    data = request.get_json(silent=True) or {}
+    vraag = data.get('vraag', '').strip()
+    if not vraag:
+        return jsonify({'error': 'Geen vraag opgegeven'}), 400
+
+    # Bouw zaak-context
+    context_parts = []
+    context_parts.append(f"ZAAK: {zaak.naam}")
+    context_parts.append(f"STATUS: {zaak.status}")
+    if zaak.procedure_type:
+        context_parts.append(f"TYPE: {zaak.procedure_type}")
+    if zaak.omschrijving:
+        context_parts.append(f"\nSAMENVATTING:\n{zaak.omschrijving}")
+
+    # Voeg document samenvattingen toe
+    docs_met_sam = zaak.documenten.filter(Document.samenvatting != '').order_by(Document.doc_datum).all()
+    if docs_met_sam:
+        context_parts.append("\nDOCUMENTEN:")
+        for d in docs_met_sam:
+            if d.samenvatting and len(d.samenvatting) > 5:
+                context_parts.append(f"- {d.bestandsnaam} ({d.doc_datum or '?'}): {d.samenvatting[:300]}")
+
+    # Voeg analyses toe (tijdlijn, personen)
+    analyses = Analyse.query.filter_by(zaak_id=zaak_id).all()
+    for a in analyses:
+        if a.result_text and len(a.result_text) > 10:
+            context_parts.append(f"\n{a.type.upper()}:\n{a.result_text[:2000]}")
+
+    zaak_context = '\n'.join(context_parts)
+
+    # System prompt
+    system_prompt = f"""Je bent een juridisch assistent die advies geeft over een specifieke rechtszaak.
+Je kent alle details van de zaak, inclusief documenten, tijdlijn en betrokken personen.
+Geef concreet, praktisch advies in het Nederlands. Verwijs naar relevante wetsartikelen.
+Wees direct en helder. Als je iets niet zeker weet, zeg dat eerlijk.
+
+ZAAK-CONTEXT:
+{zaak_context[:4000]}"""
+
+    # Chat history
+    history = data.get('history', [])
+    messages = []
+    for msg in history[-8:]:  # Max 8 berichten history
+        if msg.get('role') == 'user':
+            messages.append({'role': 'user', 'content': msg['content']})
+        elif msg.get('role') == 'assistant':
+            messages.append({'role': 'assistant', 'content': msg['content']})
+
+    # Voeg huidige vraag toe als die niet in history zit
+    if not messages or messages[-1].get('content') != vraag:
+        messages.append({'role': 'user', 'content': vraag})
+
+    # Probeer Ollama, anders cloud
+    ollama = get_ollama()
+    cloud = get_cloud_ai()
+
+    try:
+        if ollama.is_available():
+            # Direct Ollama API call met system prompt
+            import urllib.request as _ur
+            import json as _json
+            payload = _json.dumps({
+                'model': ollama.model,
+                'messages': [{'role': 'system', 'content': system_prompt}] + messages,
+                'stream': False,
+            }).encode()
+            req = _ur.Request(
+                f"{ollama.base_url}/api/chat",
+                data=payload,
+                headers={'Content-Type': 'application/json'},
+                method='POST'
+            )
+            resp = _ur.urlopen(req, timeout=120)
+            result = _json.loads(resp.read())
+            antwoord = result.get('message', {}).get('content', 'Geen antwoord')
+            return jsonify({'antwoord': antwoord, 'provider': 'ollama', 'model': ollama.model})
+
+        elif cloud.is_configured():
+            antwoord = cloud.chat(system_prompt, messages)
+            return jsonify({'antwoord': antwoord, 'provider': cloud.provider, 'model': cloud.model})
+
+        else:
+            return jsonify({'error': 'Geen AI beschikbaar. Start Ollama (ollama serve) of stel een API key in.'}), 400
+
+    except Exception as e:
+        return jsonify({'error': f'AI fout: {str(e)}'}), 500
 
 
 # ===================================================================

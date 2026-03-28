@@ -33,6 +33,7 @@ class Zaak(db.Model):
     wederpartij     = db.Column(db.String(500), default='')
     instantie       = db.Column(db.String(500), default='')       # Bestuursorgaan / organisatie
     deadline        = db.Column(db.DateTime, nullable=True)
+    deadline_reden  = db.Column(db.Text, default='')
     notities        = db.Column(db.Text, default='')
     samenvatting            = db.Column(db.Text, default='')
     samenvatting_updated_at = db.Column(db.DateTime, nullable=True)
@@ -56,6 +57,7 @@ class Zaak(db.Model):
             'wederpartij': self.wederpartij,
             'instantie': self.instantie,
             'deadline': self.deadline.isoformat() if self.deadline else None,
+            'deadline_reden': self.deadline_reden or '',
             'notities': self.notities,
             'samenvatting': self.samenvatting or '',
             'samenvatting_updated_at': self.samenvatting_updated_at.isoformat() if self.samenvatting_updated_at else None,
