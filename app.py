@@ -944,6 +944,50 @@ def batch_copy_documents():
     })
 
 
+@app.route('/api/zaken/<zaak_id>/save-reactie', methods=['POST'])
+def save_reactie(zaak_id):
+    """Sla een geschreven reactie op als document in de zaakmap."""
+    zaak = Zaak.query.get(zaak_id)
+    if not zaak:
+        return jsonify({'error': 'Zaak niet gevonden'}), 404
+
+    data = request.get_json(silent=True) or {}
+    tekst = data.get('tekst', '')
+    filename = data.get('filename', 'reactie.txt')
+
+    if not tekst.strip():
+        return jsonify({'error': 'Geen tekst'}), 400
+
+    # Sla op in zaakmap
+    save_dir = zaak.folder_path or os.path.join(Config.DEFAULT_DATA_DIR, zaak_id)
+    os.makedirs(save_dir, exist_ok=True)
+    filepath = os.path.join(save_dir, filename)
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(tekst)
+
+    # Voeg toe als document in database
+    from datetime import datetime
+    doc = Document(
+        id=maak_id(),
+        zaak_id=zaak_id,
+        bestandsnaam=filename,
+        bestandspad=filepath,
+        bestandstype='txt',
+        bestandsgrootte=len(tekst.encode('utf-8')),
+        extracted_text=tekst,
+        extraction_done=True,
+        doc_type='reactie',
+        doc_datum=datetime.now().strftime('%Y-%m-%d'),
+        doc_afzender='A. Spijker',
+        samenvatting=f'REACTIE | {datetime.now().strftime("%Y-%m-%d")} | Geschreven in Juridisch Assistent',
+    )
+    db.session.add(doc)
+    db.session.commit()
+
+    return jsonify({'ok': True, 'filename': filename, 'path': filepath, 'doc_id': doc.id})
+
+
 @app.route('/api/zaken/<zaak_id>/extract-all', methods=['POST'])
 def extract_all_documents(zaak_id):
     """Extraheer tekst uit alle documenten van een zaak."""

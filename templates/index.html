@@ -2715,7 +2715,12 @@ function pgDocument(docId) {
     } else if (data.bestandsnaam.match(/\.(png|jpg|jpeg|gif|bmp|tiff?)$/i)) {
       h += '<img src="/api/documenten/' + docId + '/file" style="max-width:100%;max-height:100%;object-fit:contain">';
     } else {
-      h += '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--tx3)"><div style="text-align:center"><span class="mi" style="font-size:48px;display:block;margin-bottom:8px">description</span>Preview niet beschikbaar voor dit bestandstype</div></div>';
+      // Voor docx/txt: toon geextraheerde tekst als preview
+      if (data.extracted_text) {
+        h += '<div style="padding:16px;overflow-y:auto;height:100%;font-size:13px;line-height:1.7;color:var(--tx2);white-space:pre-wrap">' + esc(data.extracted_text) + '</div>';
+      } else {
+        h += '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--tx3)"><div style="text-align:center"><span class="mi" style="font-size:48px;display:block;margin-bottom:8px">description</span>Klik op "Extraheer tekst" om de inhoud te laden</div></div>';
+      }
     }
     h += '</div>';
 
@@ -2747,7 +2752,7 @@ function pgDocument(docId) {
       h += '<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="docChatQuick(\'' + docId + '\',\'Welke juridische argumenten staan in dit document?\')">Juridische argumenten</button>';
       h += '<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="docChatQuick(\'' + docId + '\',\'Welke namen en organisaties worden genoemd?\')">Namen & organisaties</button>';
       h += '<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="docChatQuick(\'' + docId + '\',\'Welke termijnen of deadlines worden genoemd?\')">Termijnen</button>';
-      h += '<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="docChatQuick(\'' + docId + '\',\'Schrijf een reactie op deze brief\')">Schrijf reactie</button>';
+      h += '<button class="btn btn-blue btn-sm" style="font-size:11px" onclick="openReactieEditor(\'' + docId + '\')"><span class="mi" style="font-size:12px">edit_document</span> Schrijf reactie</button>';
       h += '</div></div>';
     } else {
       _docChatHistory[docId].forEach(function(msg) {
@@ -2787,6 +2792,135 @@ function docChatQuick(docId, vraag) {
   var input = document.getElementById('docChatInput');
   if (input) input.value = vraag;
   sendDocChat(docId);
+}
+
+function openReactieEditor(docId) {
+  // Vervang de chat panel door een reactie editor
+  var chatPanel = document.getElementById('docChatMsgs');
+  var chatContainer = chatPanel ? chatPanel.parentElement : null;
+  if (!chatContainer) return;
+
+  var h = '<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px">';
+  h += '<span class="mi" style="color:var(--green)">edit_document</span>';
+  h += '<strong style="font-size:13px">Reactie schrijven</strong>';
+  h += '<span style="flex:1"></span>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="pgDocument(\'' + docId + '\')"><span class="mi">close</span></button>';
+  h += '</div>';
+
+  // Type selectie
+  h += '<div style="padding:8px 14px;display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--bd)">';
+  var types = [
+    {id:'reactie', label:'Reactie', icon:'reply'},
+    {id:'bezwaar', label:'Bezwaarschrift', icon:'edit_document'},
+    {id:'beroep', label:'Beroepschrift', icon:'gavel'},
+    {id:'ingebrekestelling', label:'Ingebrekestelling', icon:'warning'},
+    {id:'klacht', label:'Klacht', icon:'flag'},
+    {id:'brief', label:'Vrije brief', icon:'mail'},
+  ];
+  types.forEach(function(t) {
+    h += '<button class="btn btn-ghost btn-sm" style="font-size:10px" onclick="generateReactie(\'' + docId + '\',\'' + t.id + '\')"><span class="mi" style="font-size:12px">' + t.icon + '</span> ' + t.label + '</button>';
+  });
+  h += '</div>';
+
+  // Editor
+  h += '<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">';
+  h += '<div id="reactieStatus" style="padding:6px 14px;font-size:11px;color:var(--tx3)">Kies een type hierboven of begin direct met typen</div>';
+  h += '<textarea id="reactieEditor" style="flex:1;padding:12px 14px;background:var(--bg);color:var(--tx);border:none;resize:none;font-size:13px;line-height:1.7;font-family:inherit" placeholder="Begin hier met typen of laat Claude een concept genereren..."></textarea>';
+  h += '</div>';
+
+  // Acties onderaan
+  h += '<div style="padding:8px 14px;border-top:1px solid var(--bd);display:flex;gap:6px;flex-wrap:wrap">';
+  h += '<button class="btn btn-blue btn-sm" onclick="saveReactie(\'' + docId + '\')"><span class="mi">save</span> Opslaan als document</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="copyReactie()"><span class="mi">content_copy</span> Kopieer</button>';
+  h += '<button class="btn btn-ghost btn-sm" onclick="improveReactie(\'' + docId + '\')"><span class="mi">auto_awesome</span> Verbeter met AI</button>';
+  h += '</div>';
+
+  chatContainer.innerHTML = h;
+}
+
+function generateReactie(docId, type) {
+  var editor = document.getElementById('reactieEditor');
+  var status = document.getElementById('reactieStatus');
+  if (!editor || !status) return;
+
+  var typeLabels = {reactie:'reactie', bezwaar:'bezwaarschrift', beroep:'beroepschrift', ingebrekestelling:'ingebrekestelling', klacht:'klacht', brief:'brief'};
+  status.innerHTML = '<span class="mi" style="font-size:12px;animation:spin 1s linear infinite">hourglass_top</span> Claude schrijft ' + (typeLabels[type] || type) + '...';
+  editor.disabled = true;
+
+  var prompt = 'Schrijf een ' + (typeLabels[type] || type) + ' als reactie op dit document. ';
+  prompt += 'Schrijf in het Nederlands, professioneel juridisch. ';
+  prompt += 'Verwijs naar relevante wetsartikelen. ';
+  prompt += 'Begin met datum en geadresseerde. Eindig met "Hoogachtend" en naam A. Spijker. ';
+  if (type === 'bezwaar') prompt += 'Gebruik de structuur: gronden van bezwaar, feiten, juridisch kader, verzoek. ';
+  if (type === 'beroep') prompt += 'Gebruik de structuur: feiten, juridisch kader, gronden, verzoek aan rechtbank. ';
+  if (type === 'ingebrekestelling') prompt += 'Vermeld de wettelijke termijn die overschreden is, verwijs naar art. 4:17 Awb, en eis dwangsom. ';
+  if (type === 'klacht') prompt += 'Beschrijf het gedrag dat klachtwaardig is, verwijs naar Awb hoofdstuk 9. ';
+
+  docChatQuick(docId, prompt);
+
+  // Wacht op antwoord en vul editor
+  var checkInterval = setInterval(function() {
+    var history = _docChatHistory[docId] || [];
+    var last = history[history.length - 1];
+    if (last && last.role === 'assistant' && last.content && !last.content.includes('Denken...')) {
+      clearInterval(checkInterval);
+      editor.value = last.content;
+      editor.disabled = false;
+      status.innerHTML = '<span class="mi" style="font-size:12px;color:var(--green)">check_circle</span> ' + (typeLabels[type] || type) + ' gegenereerd — bewerk naar wens';
+    }
+  }, 1000);
+
+  // Timeout na 2 minuten
+  setTimeout(function() { clearInterval(checkInterval); editor.disabled = false; }, 120000);
+}
+
+function improveReactie(docId) {
+  var editor = document.getElementById('reactieEditor');
+  var status = document.getElementById('reactieStatus');
+  if (!editor || !editor.value.trim()) { toast('Schrijf eerst een tekst'); return; }
+
+  status.innerHTML = '<span class="mi" style="font-size:12px;animation:spin 1s linear infinite">hourglass_top</span> Claude verbetert de tekst...';
+
+  docChatQuick(docId, 'Verbeter deze tekst juridisch. Maak het scherper, voeg relevante wetsartikelen toe, en zorg dat het professioneel en overtuigend is. Behoud de structuur. Hier is de tekst:\n\n' + editor.value);
+
+  var checkInterval = setInterval(function() {
+    var history = _docChatHistory[docId] || [];
+    var last = history[history.length - 1];
+    if (last && last.role === 'assistant' && last.content && !last.content.includes('Denken...')) {
+      clearInterval(checkInterval);
+      editor.value = last.content;
+      status.innerHTML = '<span class="mi" style="font-size:12px;color:var(--green)">check_circle</span> Tekst verbeterd';
+    }
+  }, 1000);
+  setTimeout(function() { clearInterval(checkInterval); }, 120000);
+}
+
+function copyReactie() {
+  var editor = document.getElementById('reactieEditor');
+  if (editor) {
+    navigator.clipboard.writeText(editor.value);
+    toast('Tekst gekopieerd naar klembord');
+  }
+}
+
+function saveReactie(docId) {
+  var editor = document.getElementById('reactieEditor');
+  if (!editor || !editor.value.trim()) { toast('Schrijf eerst een tekst'); return; }
+
+  // Haal zaak_id op van dit document
+  apiFetch('/documenten/' + docId + '/text', function(err, data) {
+    if (err) { toast('Fout'); return; }
+    var zaakId = data.zaak_id;
+    var filename = 'reactie_' + new Date().toISOString().substring(0,10).replace(/-/g,'') + '.txt';
+
+    apiFetch('/zaken/' + zaakId + '/save-reactie', {
+      method: 'POST',
+      body: { tekst: editor.value, filename: filename, bron_doc_id: docId }
+    }, function(err2, result, ok) {
+      if (err2 || !ok) { toast('Fout bij opslaan: ' + (err2 || result.error)); return; }
+      toast('Reactie opgeslagen als ' + filename);
+    });
+  });
 }
 
 function sendDocChat(docId) {
