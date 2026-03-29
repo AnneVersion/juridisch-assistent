@@ -2807,6 +2807,11 @@ function openReactieEditor(docId) {
   h += '<button class="btn btn-ghost btn-sm" onclick="pgDocument(\'' + docId + '\')"><span class="mi">close</span></button>';
   h += '</div>';
 
+  // AI advies: welke procedure
+  h += '<div id="reactieAdvies" style="padding:10px 14px;border-bottom:1px solid var(--bd);font-size:12px">';
+  h += '<div style="color:var(--tx3)"><span class="mi" style="font-size:14px;animation:spin 1s linear infinite;vertical-align:-3px">hourglass_top</span> Claude analyseert welke reactie het beste past...</div>';
+  h += '</div>';
+
   // Type selectie
   h += '<div style="padding:8px 14px;display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--bd)">';
   var types = [
@@ -2818,13 +2823,53 @@ function openReactieEditor(docId) {
     {id:'brief', label:'Vrije brief', icon:'mail'},
   ];
   types.forEach(function(t) {
-    h += '<button class="btn btn-ghost btn-sm" style="font-size:10px" onclick="generateReactie(\'' + docId + '\',\'' + t.id + '\')"><span class="mi" style="font-size:12px">' + t.icon + '</span> ' + t.label + '</button>';
+    h += '<button class="btn btn-ghost btn-sm" style="font-size:10px" id="reactieBtn_' + t.id + '" onclick="generateReactie(\'' + docId + '\',\'' + t.id + '\')"><span class="mi" style="font-size:12px">' + t.icon + '</span> ' + t.label + '</button>';
   });
   h += '</div>';
 
   // Editor
   h += '<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">';
-  h += '<div id="reactieStatus" style="padding:6px 14px;font-size:11px;color:var(--tx3)">Kies een type hierboven of begin direct met typen</div>';
+  h += '<div id="reactieStatus" style="padding:6px 14px;font-size:11px;color:var(--tx3)">Kies een type hierboven of wacht op AI advies</div>';
+
+  // Vraag Claude welke procedure het beste past
+  setTimeout(function() {
+    apiFetch('/documenten/' + docId + '/chat', {
+      method: 'POST',
+      body: {
+        vraag: 'Analyseer dit document en adviseer welk type reactie het beste is. Geef je antwoord in dit format:\n\nAANBEVOLEN: [type: reactie/bezwaar/beroep/ingebrekestelling/klacht]\nWAAROM: [korte uitleg waarom dit type het beste past]\nTERMIJN: [binnen hoeveel dagen/weken moet dit verstuurd worden]\nKANS: [hoog/middel/laag - kans van slagen]\nOPLEVERT: [wat het concreet oplevert]',
+        history: []
+      }
+    }, function(err, data) {
+      var el = document.getElementById('reactieAdvies');
+      if (!el) return;
+      if (err || !data || !data.antwoord) {
+        el.innerHTML = '<div style="color:var(--tx3)">AI advies niet beschikbaar. Kies zelf een type.</div>';
+        return;
+      }
+      var antwoord = data.antwoord;
+
+      // Parse het advies
+      var aanbevolenMatch = antwoord.match(/AANBEVOLEN:\s*\[?(?:type:\s*)?([\w]+)\]?/i);
+      var aanbevolen = aanbevolenMatch ? aanbevolenMatch[1].toLowerCase() : '';
+
+      // Highlight de aanbevolen knop
+      if (aanbevolen) {
+        var btn = document.getElementById('reactieBtn_' + aanbevolen);
+        if (btn) {
+          btn.style.background = 'var(--accent)';
+          btn.style.color = '#fff';
+          btn.style.fontWeight = '700';
+        }
+      }
+
+      // Toon advies
+      var h2 = '<div style="background:rgba(16,185,129,.08);border-radius:8px;padding:8px 12px;border-left:3px solid #10b981">';
+      h2 += '<div style="font-size:11px;font-weight:700;color:#10b981;margin-bottom:4px"><span class="mi" style="font-size:14px;vertical-align:-3px">lightbulb</span> AI Advies</div>';
+      h2 += '<div style="font-size:12px;color:var(--tx);line-height:1.6;white-space:pre-wrap">' + antwoord.replace(/</g,'&lt;') + '</div>';
+      h2 += '</div>';
+      el.innerHTML = h2;
+    });
+  }, 100);
   h += '<textarea id="reactieEditor" style="flex:1;padding:12px 14px;background:var(--bg);color:var(--tx);border:none;resize:none;font-size:13px;line-height:1.7;font-family:inherit" placeholder="Begin hier met typen of laat Claude een concept genereren..."></textarea>';
   h += '</div>';
 
