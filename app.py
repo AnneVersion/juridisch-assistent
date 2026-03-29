@@ -2642,6 +2642,67 @@ PROCEDURES = [
             'Een art. 12-klacht is een krachtig middel tegen passiviteit van het OM',
         ],
     },
+    # ========== EUROPEES HOF ==========
+    {
+        'type': 'ehrm',
+        'naam': 'Europees Hof voor de Rechten van de Mens (EHRM)',
+        'categorie': 'bestuursrecht',
+        'icon': 'public',
+        'kleur': '#dc2626',
+        'wettelijke_basis': 'Europees Verdrag voor de Rechten van de Mens (EVRM)',
+        'termijn': '4 maanden na definitieve nationale uitspraak (Protocol 15 EVRM)',
+        'beschrijving': 'Klacht bij het Europees Hof als alle nationale rechtsmiddelen zijn uitgeput en er sprake is van schending van het EVRM.',
+        'uitleg': (
+            'Het Europees Hof voor de Rechten van de Mens (EHRM) in Straatsburg is de laatste '
+            'juridische instantie waar je als burger een klacht kunt indienen tegen de Nederlandse Staat '
+            'wegens schending van je fundamentele rechten.\n\n'
+            'WANNEER KUN JE NAAR HET EHRM?\n'
+            '1. Alle nationale rechtsmiddelen zijn uitgeput (bezwaar, beroep, hoger beroep)\n'
+            '2. Je dient de klacht in binnen 4 maanden na de definitieve nationale uitspraak\n'
+            '3. Er is sprake van schending van een of meer EVRM-artikelen\n\n'
+            'WELKE RECHTEN KUN JE INROEPEN?\n'
+            '- Art. 6 EVRM: Recht op een eerlijk proces binnen redelijke termijn\n'
+            '  Toepassing: als je zaak onredelijk lang duurt (>2 jaar bestuursrecht)\n'
+            '- Art. 8 EVRM: Recht op privacy en bescherming persoonsgegevens\n'
+            '  Toepassing: FSV-registratie, onrechtmatige verwerking persoonsgegevens\n'
+            '- Art. 13 EVRM: Recht op een effectief rechtsmiddel\n'
+            '  Toepassing: als klachten niet serieus worden behandeld, obstructie door overheid\n'
+            '- Art. 14 EVRM: Verbod op discriminatie\n'
+            '  Toepassing: toeslagenaffaire als systematische discriminatie\n'
+            '- Art. 1 Protocol 1 EVRM: Recht op eigendom\n'
+            '  Toepassing: onterechte verrekening, niet-uitbetaling toeslagen\n\n'
+            'HOE DIEN JE EEN KLACHT IN?\n'
+            '1. Vul het officiele klachtformulier in (beschikbaar op echr.coe.int)\n'
+            '2. Beschrijf welke EVRM-artikelen geschonden zijn\n'
+            '3. Toon aan dat alle nationale rechtsmiddelen uitgeput zijn\n'
+            '4. Voeg kopie definitieve nationale uitspraak bij\n'
+            '5. Het Hof beoordeelt eerst de ontvankelijkheid\n\n'
+            'WAT KAN HET EHRM OPLEGGEN?\n'
+            '- Vaststelling dat Nederland het EVRM heeft geschonden\n'
+            '- Billijke genoegdoening (schadevergoeding, vaak EUR 5.000-50.000)\n'
+            '- Nederland moet wetgeving of praktijk aanpassen\n\n'
+            'SPECIFIEK VOOR TOESLAGENAFFAIRE:\n'
+            'De toeslagenaffaire is bij uitstek geschikt voor een EHRM-klacht vanwege:\n'
+            '- Systematische discriminatie (art. 14 + art. 8)\n'
+            '- Onredelijke vertraging hersteloperatie (art. 6)\n'
+            '- FSV-registratie zonder medeweten (art. 8)\n'
+            '- Gebrek aan effectief rechtsmiddel (art. 13)\n'
+            '- Eigendomsschending door onterechte terugvorderingen (art. 1 P1)\n\n'
+            'KOSTEN:\n'
+            'Het indienen van een klacht bij het EHRM is gratis. Je kunt je laten '
+            'bijstaan door een advocaat, maar dat is niet verplicht in de eerste fase.'
+        ),
+        'tips': [
+            'Begin nu al met documenteren: bewaar alle correspondentie, termijnoverschrijdingen en afwijzingen',
+            'Zorg dat je ALLE nationale rechtsmiddelen hebt gebruikt (bezwaar, beroep, hoger beroep)',
+            'De termijn van 4 maanden na definitieve uitspraak is ABSOLUUT - geen uitzonderingen',
+            'Het EHRM behandelt alleen klachten tegen de Staat, niet tegen particulieren',
+            'Een EHRM-uitspraak tegen Nederland heeft grote politieke impact',
+            'Overweeg een groepsklacht samen met andere toeslagenaffaire-gedupeerden',
+            'Formulier downloaden: echr.coe.int > Applicants > Application form',
+            'Gemiddelde behandeltijd: 3-5 jaar, maar urgente zaken kunnen sneller (Rule 39)',
+        ],
+    },
 ]
 
 

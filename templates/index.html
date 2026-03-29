@@ -2779,6 +2779,8 @@ function pgProcedures() {
   h += '<span class="legal-flow-item" style="background:rgba(139,92,246,.15);color:#8b5cf6" onclick="scrollToProc(\'beroep\')">Beroep</span>';
   h += '<span class="legal-flow-arrow">&rarr;</span>';
   h += '<span class="legal-flow-item" style="background:rgba(236,72,153,.15);color:#ec4899" onclick="scrollToProc(\'hoger_beroep\')">Hoger beroep</span>';
+  h += '<span class="legal-flow-arrow">&rarr;</span>';
+  h += '<span class="legal-flow-item" style="background:rgba(220,38,38,.15);color:#dc2626;font-weight:700" onclick="scrollToProc(\'ehrm\')">Europees Hof (EHRM)</span>';
   h += '<span class="legal-flow-arrow">|</span>';
   h += '<span class="legal-flow-item" style="background:rgba(249,115,22,.15);color:#f97316" onclick="scrollToProc(\'voorlopige_voorziening\')">Voorlopige voorziening</span>';
   h += '<span class="legal-flow-arrow" style="font-size:11px">(spoed, naast bezwaar/beroep)</span>';
@@ -2840,14 +2842,15 @@ function loadProcedures() {
     if (err) { el.innerHTML = '<p style="color:var(--red)">Fout bij laden: ' + esc(err) + '</p>'; return; }
 
     // Group by categorie
-    var cats = { bestuursrecht: [], civiel_recht: [], strafrecht: [] };
-    var catNames = { bestuursrecht: 'Bestuursrecht', civiel_recht: 'Civiel recht', strafrecht: 'Strafrecht' };
-    var catIcons = { bestuursrecht: 'account_balance', civiel_recht: 'description', strafrecht: 'report' };
-    var catColors = { bestuursrecht: '#3b82f6', civiel_recht: '#10b981', strafrecht: '#ef4444' };
+    var cats = { bestuursrecht: [], civiel_recht: [], strafrecht: [], europees: [] };
+    var catNames = { bestuursrecht: 'Bestuursrecht', civiel_recht: 'Civiel recht', strafrecht: 'Strafrecht', europees: 'Europees / Internationaal' };
+    var catIcons = { bestuursrecht: 'account_balance', civiel_recht: 'description', strafrecht: 'report', europees: 'public' };
+    var catColors = { bestuursrecht: '#3b82f6', civiel_recht: '#10b981', strafrecht: '#ef4444', europees: '#dc2626' };
     var catDescs = {
       bestuursrecht: 'Procedures tegen de overheid — Algemene wet bestuursrecht (Awb)',
       civiel_recht: 'Geschillen tussen burgers/bedrijven onderling — Wetboek van Burgerlijke Rechtsvordering (Rv)',
-      strafrecht: 'Strafbare feiten — Wetboek van Strafvordering (Sv)'
+      strafrecht: 'Strafbare feiten — Wetboek van Strafvordering (Sv)',
+      europees: 'Europees Hof voor de Rechten van de Mens — als alle nationale rechtsmiddelen zijn uitgeput'
     };
 
     data.forEach(function(p) {
@@ -2856,7 +2859,16 @@ function loadProcedures() {
     });
 
     var h = '';
-    var catOrder = ['bestuursrecht', 'civiel_recht', 'strafrecht'];
+    // EHRM apart categoriseren
+    data.forEach(function(p) {
+      if (p.type === 'ehrm') {
+        cats['europees'] = cats['europees'] || [];
+        cats['europees'].push(p);
+        // Verwijder uit bestuursrecht
+        cats['bestuursrecht'] = (cats['bestuursrecht'] || []).filter(function(x) { return x.type !== 'ehrm'; });
+      }
+    });
+    var catOrder = ['bestuursrecht', 'civiel_recht', 'strafrecht', 'europees'];
     catOrder.forEach(function(cat) {
       if (_procFilter !== 'alle' && _procFilter !== cat) return;
       var procs = cats[cat];
