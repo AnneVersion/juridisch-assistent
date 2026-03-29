@@ -1169,7 +1169,28 @@ function renderZaak(z) {
     h += '<span style="font-size:12px;color:var(--tx3)">(' + fmtDate(z.deadline) + ')</span>';
     h += '</div>';
     if (z.deadline_reden) {
-      h += '<div style="font-size:13px;color:var(--tx);line-height:1.6">' + esc(z.deadline_reden) + '</div>';
+      h += '<div style="font-size:13px;color:var(--tx);line-height:1.6;margin-bottom:8px">' + esc(z.deadline_reden) + '</div>';
+      // Zoek het relevante document en maak een directe link
+      var docs = z.documenten || [];
+      var relevantDoc = null;
+      var reden = (z.deadline_reden || '').toLowerCase();
+      if (reden.indexOf('beroepschrift') >= 0) {
+        relevantDoc = docs.find(function(d) { return d.bestandsnaam.indexOf('beroepschrift') >= 0; });
+      } else if (reden.indexOf('ingebrekestelling') >= 0) {
+        relevantDoc = docs.find(function(d) { return d.bestandsnaam.indexOf('ingebrekestelling') >= 0; });
+      } else if (reden.indexOf('avg') >= 0 || reden.indexOf('fsv') >= 0) {
+        relevantDoc = docs.find(function(d) { return d.bestandsnaam.toLowerCase().indexOf('avg') >= 0; });
+      }
+      // Laatste document als fallback
+      if (!relevantDoc && docs.length) {
+        relevantDoc = docs.sort(function(a,b){ return (b.doc_datum||'').localeCompare(a.doc_datum||''); })[0];
+      }
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+      if (relevantDoc) {
+        h += '<a href="#/document/' + relevantDoc.id + '" class="btn btn-blue btn-sm" style="text-decoration:none"><span class="mi">description</span> Open ' + esc(relevantDoc.bestandsnaam) + '</a>';
+      }
+      h += '<button class="btn btn-ghost btn-sm" onclick="openReactieEditor(\'' + (relevantDoc ? relevantDoc.id : '') + '\')"><span class="mi">edit_document</span> Schrijf reactie</button>';
+      h += '</div>';
     }
     h += '</div>';
   }
