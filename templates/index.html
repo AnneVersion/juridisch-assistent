@@ -2713,7 +2713,7 @@ function pgDocument(docId) {
       apiFetch('/documenten/' + _autoDocId + '/chat', {
         method: 'POST',
         body: {
-          vraag: 'Geef een compleet advies over dit document. Gebruik exact dit format:\n\n## Advies\nAANBEVOLEN ACTIE: [welk type reactie: reactie/bezwaar/beroep/ingebrekestelling/klacht/geen actie nodig]\nWAAR STUREN: [volledige naam, adres en/of email van de ontvanger]\nHOE VERSTUREN: [aangetekend per post / email / digitaal loket rechtspraak]\nTERMIJN: [binnen hoeveel dagen, welke wettelijke termijn]\nKANS VAN SLAGEN: [hoog/middel/laag met korte uitleg]\nWAT HET OPLEVERT: [concreet in euros of resultaat]\nWIE BETAALT DE DWANGSOM: [organisatie + op basis van welk wetsartikel]\nALS ZE NIET REAGEREN: [concrete vervolgstappen om af te dwingen]\n\n## Concept reactie\n[Schrijf hier direct een volledige concept-brief/reactie op dit document. Begin met datum en geadresseerde. Verwijs naar relevante wetsartikelen. Eindig met Hoogachtend, A. Spijker]',
+          vraag: 'Analyseer dit document volledig. Gebruik exact dit format:\n\n## Feiten & Sancties\nGeef per feit dat in dit document staat:\n- FEIT: [wat er is gebeurd]\n- OVERTREDING: [welke wet/regel is geschonden]\n- SANCTIE: [welke sanctie staat erop, in euros of consequentie]\n- VERANTWOORDELIJKE: [naam + functie van de ambtenaar]\n\n## Civiele procedure tegen ambtenaar\nKan er een civiele zaak tegen de betrokken ambtenaar(en) persoonlijk worden gestart?\n- MOGELIJK: [ja/nee + uitleg]\n- GRONDSLAG: [op basis van welk wetsartikel - bijv. art. 6:162 BW onrechtmatige daad]\n- TEGEN WIE: [naam + functie]\n- KANS: [hoog/middel/laag + waarom]\n- WAT HET OPLEVERT: [schadevergoeding, rectificatie, etc.]\n\n## Advies\nAANBEVOLEN ACTIE: [welk type reactie]\nWAAR STUREN: [volledige naam + adres/email]\nHOE VERSTUREN: [aangetekend post / email / digitaal loket]\nTERMIJN: [wanneer + welke wettelijke termijn]\nKANS VAN SLAGEN: [hoog/middel/laag]\nWAT HET OPLEVERT: [concreet in euros]\nWIE BETAALT: [organisatie + wetsartikel]\nALS ZE NIET REAGEREN: [vervolgstappen]\n\n## Concept brief\n[Schrijf direct een volledige concept-brief. Arnhem, datum vandaag. Volledige geadresseerde. Verwijs naar wetsartikelen. Vermeld feiten en sancties. Eindig met Hoogachtend, A. Spijker, a.spijker@live.nl.\nVoeg na de brief toe:\n--- VERSTUURINSTRUCTIES ---\nNaar wie, hoe, en wat te doen als er geen reactie komt.]',
           history: []
         }
       }, function(err, result) {
@@ -2727,15 +2727,25 @@ function pgDocument(docId) {
         var tekst = result.antwoord;
         var html = tekst
           .replace(/</g, '&lt;')
-          .replace(/## (.*)/g, '<div style="font-size:14px;font-weight:700;color:#10b981;margin:12px 0 6px;border-bottom:1px solid rgba(16,185,129,.2);padding-bottom:4px">$1</div>')
-          .replace(/AANBEVOLEN ACTIE:/g, '<strong style="color:#10b981">AANBEVOLEN ACTIE:</strong>')
-          .replace(/WAAR STUREN:/g, '<strong style="color:var(--accent)">WAAR STUREN:</strong>')
+          .replace(/## (.*)/g, '<div style="font-size:14px;font-weight:700;color:#10b981;margin:16px 0 8px;border-bottom:2px solid rgba(16,185,129,.3);padding-bottom:4px">$1</div>')
+          .replace(/- FEIT:/g, '<span style="color:#ef4444;font-weight:700">&#x26A0; FEIT:</span>')
+          .replace(/- OVERTREDING:/g, '<span style="color:#f97316;font-weight:700">&nbsp;&nbsp;OVERTREDING:</span>')
+          .replace(/- SANCTIE:/g, '<span style="color:#eab308;font-weight:700">&nbsp;&nbsp;SANCTIE:</span>')
+          .replace(/- VERANTWOORDELIJKE:/g, '<span style="color:#8b5cf6;font-weight:700">&nbsp;&nbsp;VERANTWOORDELIJKE:</span>')
+          .replace(/- MOGELIJK:/g, '<span style="color:#10b981;font-weight:700">MOGELIJK:</span>')
+          .replace(/- GRONDSLAG:/g, '<span style="color:var(--accent);font-weight:700">GRONDSLAG:</span>')
+          .replace(/- TEGEN WIE:/g, '<span style="color:#ef4444;font-weight:700">TEGEN WIE:</span>')
+          .replace(/- KANS:/g, '<span style="color:#8b5cf6;font-weight:700">KANS:</span>')
+          .replace(/- WAT HET OPLEVERT:/g, '<span style="color:#10b981;font-weight:700">OPLEVERT:</span>')
+          .replace(/AANBEVOLEN ACTIE:/g, '<strong style="color:#10b981">&#x2705; AANBEVOLEN ACTIE:</strong>')
+          .replace(/WAAR STUREN:/g, '<strong style="color:var(--accent)">&#x1F4E8; WAAR STUREN:</strong>')
           .replace(/HOE VERSTUREN:/g, '<strong style="color:var(--accent)">HOE VERSTUREN:</strong>')
-          .replace(/TERMIJN:/g, '<strong style="color:#eab308">TERMIJN:</strong>')
+          .replace(/TERMIJN:/g, '<strong style="color:#eab308">&#x23F0; TERMIJN:</strong>')
           .replace(/KANS VAN SLAGEN:/g, '<strong style="color:#8b5cf6">KANS VAN SLAGEN:</strong>')
-          .replace(/WAT HET OPLEVERT:/g, '<strong style="color:#10b981">WAT HET OPLEVERT:</strong>')
-          .replace(/WIE BETAALT DE DWANGSOM:/g, '<strong style="color:#f97316">WIE BETAALT:</strong>')
-          .replace(/ALS ZE NIET REAGEREN:/g, '<strong style="color:#ef4444">ALS ZE NIET REAGEREN:</strong>')
+          .replace(/WAT HET OPLEVERT:/g, '<strong style="color:#10b981">&#x1F4B0; WAT HET OPLEVERT:</strong>')
+          .replace(/WIE BETAALT:/g, '<strong style="color:#f97316">WIE BETAALT:</strong>')
+          .replace(/ALS ZE NIET REAGEREN:/g, '<strong style="color:#ef4444">&#x26A0; ALS ZE NIET REAGEREN:</strong>')
+          .replace(/--- VERSTUURINSTRUCTIES ---/g, '<div style="margin-top:12px;padding:8px 12px;background:rgba(59,130,246,.08);border-radius:8px;border-left:3px solid var(--accent)"><strong style="color:var(--accent)">VERSTUURINSTRUCTIES</strong></div>')
           .replace(/\n/g, '<br>');
         el.innerHTML = '<div style="line-height:1.7">' + html + '</div>';
         el.innerHTML += '<div style="margin-top:12px;display:flex;gap:6px">';
