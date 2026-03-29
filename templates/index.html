@@ -2680,6 +2680,50 @@ function pgDocument(docId) {
       h += '</div>';
     }
 
+    // AI Advies + Concept reactie (laadt automatisch)
+    h += '<div id="docAutoAdvies" class="card" style="margin-bottom:12px;padding:12px 16px;border-left:3px solid #10b981">';
+    h += '<div style="font-size:11px;color:#10b981;font-weight:600;margin-bottom:4px"><span class="mi mi-sm">lightbulb</span> AI ADVIES & CONCEPT REACTIE</div>';
+    h += '<div id="docAutoAdviesContent" style="font-size:12px;color:var(--tx3)"><span class="mi" style="font-size:14px;animation:spin 1s linear infinite;vertical-align:-3px">hourglass_top</span> Claude analyseert het document...</div>';
+    h += '</div>';
+
+    // Laad automatisch advies + concept
+    var _autoDocId = data.id;
+    setTimeout(function() {
+      apiFetch('/documenten/' + _autoDocId + '/chat', {
+        method: 'POST',
+        body: {
+          vraag: 'Geef een compleet advies over dit document. Gebruik exact dit format:\n\n## Advies\nAANBEVOLEN ACTIE: [welk type reactie: reactie/bezwaar/beroep/ingebrekestelling/klacht/geen actie nodig]\nWAAR STUREN: [volledige naam, adres en/of email van de ontvanger]\nHOE VERSTUREN: [aangetekend per post / email / digitaal loket rechtspraak]\nTERMIJN: [binnen hoeveel dagen, welke wettelijke termijn]\nKANS VAN SLAGEN: [hoog/middel/laag met korte uitleg]\nWAT HET OPLEVERT: [concreet in euros of resultaat]\nWIE BETAALT DE DWANGSOM: [organisatie + op basis van welk wetsartikel]\nALS ZE NIET REAGEREN: [concrete vervolgstappen om af te dwingen]\n\n## Concept reactie\n[Schrijf hier direct een volledige concept-brief/reactie op dit document. Begin met datum en geadresseerde. Verwijs naar relevante wetsartikelen. Eindig met Hoogachtend, A. Spijker]',
+          history: []
+        }
+      }, function(err, result) {
+        var el = document.getElementById('docAutoAdviesContent');
+        if (!el) return;
+        if (err || !result || !result.antwoord) {
+          el.innerHTML = '<span style="color:var(--tx3)">AI advies kon niet geladen worden. Gebruik de chat rechts om vragen te stellen.</span>';
+          return;
+        }
+        // Render met formatting
+        var tekst = result.antwoord;
+        var html = tekst
+          .replace(/</g, '&lt;')
+          .replace(/## (.*)/g, '<div style="font-size:14px;font-weight:700;color:#10b981;margin:12px 0 6px;border-bottom:1px solid rgba(16,185,129,.2);padding-bottom:4px">$1</div>')
+          .replace(/AANBEVOLEN ACTIE:/g, '<strong style="color:#10b981">AANBEVOLEN ACTIE:</strong>')
+          .replace(/WAAR STUREN:/g, '<strong style="color:var(--accent)">WAAR STUREN:</strong>')
+          .replace(/HOE VERSTUREN:/g, '<strong style="color:var(--accent)">HOE VERSTUREN:</strong>')
+          .replace(/TERMIJN:/g, '<strong style="color:#eab308">TERMIJN:</strong>')
+          .replace(/KANS VAN SLAGEN:/g, '<strong style="color:#8b5cf6">KANS VAN SLAGEN:</strong>')
+          .replace(/WAT HET OPLEVERT:/g, '<strong style="color:#10b981">WAT HET OPLEVERT:</strong>')
+          .replace(/WIE BETAALT DE DWANGSOM:/g, '<strong style="color:#f97316">WIE BETAALT:</strong>')
+          .replace(/ALS ZE NIET REAGEREN:/g, '<strong style="color:#ef4444">ALS ZE NIET REAGEREN:</strong>')
+          .replace(/\n/g, '<br>');
+        el.innerHTML = '<div style="line-height:1.7">' + html + '</div>';
+        el.innerHTML += '<div style="margin-top:12px;display:flex;gap:6px">';
+        el.innerHTML += '<button class="btn btn-blue btn-sm" onclick="copyAutoAdvies()"><span class="mi">content_copy</span> Kopieer brief</button>';
+        el.innerHTML += '<button class="btn btn-ghost btn-sm" onclick="openReactieEditor(\'' + _autoDocId + '\')"><span class="mi">edit</span> Bewerk in editor</button>';
+        el.innerHTML += '</div>';
+      });
+    }, 200);
+
     // Metadata
     var meta = data.metadata || {};
     var metaParts = [];
@@ -2792,6 +2836,14 @@ function docChatQuick(docId, vraag) {
   var input = document.getElementById('docChatInput');
   if (input) input.value = vraag;
   sendDocChat(docId);
+}
+
+function copyAutoAdvies() {
+  var el = document.getElementById('docAutoAdviesContent');
+  if (el) {
+    navigator.clipboard.writeText(el.innerText);
+    toast('Brief gekopieerd naar klembord');
+  }
 }
 
 function openReactieEditor(docId) {
