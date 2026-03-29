@@ -2836,7 +2836,7 @@ function openReactieEditor(docId) {
     apiFetch('/documenten/' + docId + '/chat', {
       method: 'POST',
       body: {
-        vraag: 'Analyseer dit document en adviseer welk type reactie het beste is. Geef je antwoord in dit format:\n\nAANBEVOLEN: [type: reactie/bezwaar/beroep/ingebrekestelling/klacht]\nWAAROM: [korte uitleg waarom dit type het beste past]\nTERMIJN: [binnen hoeveel dagen/weken moet dit verstuurd worden]\nKANS: [hoog/middel/laag - kans van slagen]\nOPLEVERT: [wat het concreet oplevert]',
+        vraag: 'Analyseer dit document en adviseer welk type reactie het beste is. Geef CONCREET en PRAKTISCH advies. Gebruik dit format:\n\nAANBEVOLEN: [type: reactie/bezwaar/beroep/ingebrekestelling/klacht]\nWAAROM: [waarom dit type het beste past voor dit specifieke document]\nSTUUR NAAR: [volledige naam + adres/email van de ontvanger, gebaseerd op het document]\nHOE VERSTUREN: [per post aangetekend / per email / via loket.rechtspraak.nl / per Zivver]\nTERMIJN: [binnen hoeveel dagen moet dit verstuurd worden + welke wettelijke termijn geldt]\nKANS: [hoog/middel/laag met toelichting]\nOPLEVERT: [wat het concreet oplevert in euros of resultaat]\nWIE BETAALT: [wie moet de dwangsom/schadevergoeding betalen en op basis van welk wetsartikel]\nAFDWINGEN: [hoe dwing je het af als ze niet reageren - concrete vervolgstappen]\nLET OP: [valkuilen of aandachtspunten]',
         history: []
       }
     }, function(err, data) {
@@ -2895,11 +2895,14 @@ function generateReactie(docId, type) {
   var prompt = 'Schrijf een ' + (typeLabels[type] || type) + ' als reactie op dit document. ';
   prompt += 'Schrijf in het Nederlands, professioneel juridisch. ';
   prompt += 'Verwijs naar relevante wetsartikelen. ';
-  prompt += 'Begin met datum en geadresseerde. Eindig met "Hoogachtend" en naam A. Spijker. ';
-  if (type === 'bezwaar') prompt += 'Gebruik de structuur: gronden van bezwaar, feiten, juridisch kader, verzoek. ';
-  if (type === 'beroep') prompt += 'Gebruik de structuur: feiten, juridisch kader, gronden, verzoek aan rechtbank. ';
-  if (type === 'ingebrekestelling') prompt += 'Vermeld de wettelijke termijn die overschreden is, verwijs naar art. 4:17 Awb, en eis dwangsom. ';
-  if (type === 'klacht') prompt += 'Beschrijf het gedrag dat klachtwaardig is, verwijs naar Awb hoofdstuk 9. ';
+  prompt += 'Begin met: Arnhem, [datum van vandaag]. Dan de VOLLEDIGE naam en adres van de geadresseerde (haal dit uit het document of de zaak context). ';
+  prompt += 'Vermeld altijd: Betreft: [zaaknummer], Indiener: A. Spijker. ';
+  prompt += 'Eindig met: Hoogachtend, A. Spijker, a.spijker@live.nl. ';
+  prompt += 'Voeg na de brief toe: --- VERSTUURINSTRUCTIES --- met: naar wie, hoe versturen (post/email/digitaal loket), en wat te doen als er geen reactie komt. ';
+  if (type === 'bezwaar') prompt += 'Structuur: gronden van bezwaar, feiten, juridisch kader, verzoek. Vermeld bezwaartermijn (6 weken). ';
+  if (type === 'beroep') prompt += 'Structuur: feiten, juridisch kader, gronden, verzoek aan rechtbank incl. dwangsom en proceskosten. ';
+  if (type === 'ingebrekestelling') prompt += 'Vermeld exact welke wettelijke termijn overschreden is, verwijs naar art. 4:17 Awb. Vermeld dat de dwangsom na 2 weken automatisch verschuldigd is (EUR 23/dag eerste 14 dagen, EUR 35/dag volgende 14 dagen, EUR 45/dag daarna, max EUR 1.442). Vermeld dat je bij niet-betaling naar de rechter stapt voor een betalingsbevel. ';
+  if (type === 'klacht') prompt += 'Beschrijf het gedrag dat klachtwaardig is, verwijs naar Awb hoofdstuk 9. Vermeld dat je bij onbevredigende klachtafhandeling naar de Nationale Ombudsman gaat. ';
 
   docChatQuick(docId, prompt);
 
