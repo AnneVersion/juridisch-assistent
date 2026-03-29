@@ -1777,21 +1777,29 @@ def ai_refresh_zaak(zaak_id):
 
     # Verzamel ALLE document teksten (extracted of samenvattingen)
     docs = zaak.documenten.order_by(Document.doc_datum).all()
+    # Gebruik samenvattingen als die er zijn (sneller + efficienter)
     doc_texts = []
     for d in docs:
-        tekst = d.extracted_text or d.samenvatting or ''
-        if tekst.strip():
-            datum = d.doc_datum or d.file_modified or '?'
-            afzender = d.doc_afzender or '?'
-            ontvanger = d.doc_ontvanger or '?'
-            doc_texts.append(f"[{datum}] {d.bestandsnaam} (van: {afzender}, aan: {ontvanger}):\n{tekst[:1500]}")
+        datum = d.doc_datum or d.file_modified or '?'
+        afzender = d.doc_afzender or '?'
+        ontvanger = d.doc_ontvanger or '?'
+        dtype = d.doc_type or '?'
+
+        if d.samenvatting and len(d.samenvatting) > 10:
+            # Gebruik bestaande samenvatting (kort en efficient)
+            doc_texts.append(f"[{datum}] {d.bestandsnaam} ({dtype}, van: {afzender}, aan: {ontvanger}):\n{d.samenvatting}")
+        elif d.extracted_text and len(d.extracted_text.strip()) > 10:
+            # Fallback naar ruwe tekst (afgekort)
+            doc_texts.append(f"[{datum}] {d.bestandsnaam} ({dtype}, van: {afzender}, aan: {ontvanger}):\n{d.extracted_text[:800]}")
+        else:
+            # Alleen bestandsnaam en metadata
+            doc_texts.append(f"[{datum}] {d.bestandsnaam} ({dtype}, van: {afzender}, aan: {ontvanger}): geen tekst beschikbaar")
 
     if not doc_texts:
-        # Gebruik omschrijving als er geen teksten zijn
         if zaak.omschrijving:
             doc_texts = [zaak.omschrijving]
         else:
-            return jsonify({'error': 'Geen documenten met tekst. Extraheer eerst de tekst.'}), 400
+            return jsonify({'error': 'Geen documenten met tekst of samenvattingen.'}), 400
 
     combined = '\n\n---\n\n'.join(doc_texts)
 
