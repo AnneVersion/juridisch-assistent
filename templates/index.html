@@ -1346,9 +1346,9 @@ function renderDocsTab(z) {
 
   // Sorteer op datum (nieuwste eerst)
   docs.sort(function(a, b) {
-    var da = a.doc_datum || a.file_modified || '0000';
-    var db = b.doc_datum || b.file_modified || '0000';
-    return db.localeCompare(da);
+    var dateA = a.doc_datum || a.file_modified || '0000';
+    var dateB = b.doc_datum || b.file_modified || '0000';
+    return dateB.localeCompare(dateA);
   });
 
   if (!docs.length) {
@@ -2536,23 +2536,109 @@ function sendChat(zaakId) {
 function renderMeldpuntTab(zaakId) {
   var tc = document.getElementById('tabContent');
   tc.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-  apiFetch('/meldpunt/prepare/' + zaakId, function(err, melding) {
-    if (err) { tc.innerHTML = '<p>Fout bij laden</p>'; return; }
-    var h = '<div class="card">';
-    h += '<h3 style="font-size:15px;margin-bottom:16px"><span class="mi" style="color:var(--red)">flag</span> Melding indienen bij Meldpunt Ambtenaren</h3>';
-    h += '<div class="form-group"><label class="form-label">Titel</label><input class="form-input" id="mpTitel" value="' + esc(melding.titel) + '"></div>';
-    h += '<div class="form-group"><label class="form-label">Ambtenaar / Wederpartij</label><input class="form-input" id="mpNaam" value="' + esc((melding.namen[0]||{}).naam||'') + '"></div>';
-    h += '<div class="form-group"><label class="form-label">Functie</label><input class="form-input" id="mpFunctie" value="' + esc((melding.namen[0]||{}).functie||'') + '"></div>';
-    h += '<div class="form-group"><label class="form-label">Instantie</label><input class="form-input" id="mpInstantie" value="' + esc(melding.instantie) + '"></div>';
-    h += '<div class="form-group"><label class="form-label">Verhaal</label><textarea class="form-input" id="mpVerhaal" rows="8">' + esc(melding.verhaal) + '</textarea></div>';
-    h += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">';
-    h += '<input type="checkbox" id="mpAnoniem" ' + (melding.anoniem ? 'checked' : '') + '> <label for="mpAnoniem" style="font-size:13px">Anoniem indienen</label>';
+
+  // Haal personen op uit analyses
+  apiFetch('/zaken/' + zaakId + '/analyses', function(err, analyses) {
+    var personen = [];
+    var personenAnalyse = (analyses || []).find(function(a) { return a.type === 'personen'; });
+
+    if (personenAnalyse && personenAnalyse.result_text) {
+      try { personen = JSON.parse(personenAnalyse.result_text); } catch(e) {}
+    }
+
+    // Filter alleen personen met overtredingen
+    var overtreders = personen.filter(function(p) { return p.overtredingen && p.overtredingen !== 'null' && p.overtredingen.length > 5; });
+
+    var h = '';
+
+    // Header
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
+    h += '<h3 style="margin:0"><span class="mi" style="color:var(--red);vertical-align:-3px">flag</span> Meldpunt Ambtenaren</h3>';
+    h += '<span style="font-size:12px;color:var(--tx3)">' + overtreders.length + ' personen met overtredingen</span>';
     h += '</div>';
-    h += '<button class="btn btn-red" onclick="submitMelding(\'' + zaakId + '\')"><span class="mi">send</span> Melding indienen</button>';
-    h += '<div id="mpResult" style="margin-top:12px"></div>';
-    h += '</div>';
+
+    if (!overtreders.length) {
+      h += '<div class="card" style="text-align:center;padding:24px;color:var(--tx3)">';
+      h += '<span class="mi" style="font-size:36px;display:block;margin-bottom:8px;opacity:0.3">people</span>';
+      h += '<p>Geen personen met overtredingen gevonden.</p>';
+      h += '<p style="font-size:12px">Klik op "AI Analyse" bovenaan om de zaak te analyseren en personen te identificeren.</p>';
+      h += '</div>';
+    } else {
+      // Per persoon een kaart met melding-knop
+      overtreders.forEach(function(p, i) {
+        h += '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--red)">';
+        h += '<div style="display:flex;justify-content:space-between;align-items:start">';
+        h += '<div style="flex:1">';
+        h += '<div style="font-size:15px;font-weight:700;color:var(--tx)">' + esc(p.naam) + '</div>';
+        h += '<div style="font-size:12px;color:var(--tx3);margin-top:2px">';
+        if (p.organisatie) h += esc(p.organisatie);
+        if (p.functie) h += ' — ' + esc(p.functie);
+        h += '</div>';
+        if (p.email) h += '<div style="font-size:11px;color:var(--accent);margin-top:2px">' + esc(p.email) + '</div>';
+        h += '</div>';
+        h += '<button class="btn btn-red btn-sm" onclick="startMelding(\'' + zaakId + '\',' + i + ')"><span class="mi">flag</span> Melding maken</button>';
+        h += '</div>';
+
+        // Overtredingen
+        h += '<div style="margin-top:10px;padding:8px 12px;background:rgba(239,68,68,.06);border-radius:8px">';
+        h += '<div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:4px">Overtredingen:</div>';
+        h += '<div style="font-size:12px;color:var(--tx2);line-height:1.6;white-space:pre-wrap">' + esc(p.overtredingen) + '</div>';
+        h += '</div>';
+        h += '</div>';
+      });
+    }
+
+    // Overige betrokkenen (zonder overtredingen)
+    var overigen = personen.filter(function(p) { return !p.overtredingen || p.overtredingen === 'null' || p.overtredingen.length <= 5; });
+    if (overigen.length) {
+      h += '<div style="margin-top:16px">';
+      h += '<h4 style="font-size:13px;color:var(--tx3);margin-bottom:8px"><span class="mi mi-sm">people</span> Overige betrokkenen (' + overigen.length + ')</h4>';
+      overigen.forEach(function(p) {
+        h += '<div style="padding:6px 12px;margin-bottom:4px;font-size:12px;color:var(--tx2);display:flex;gap:8px;align-items:center">';
+        h += '<span class="mi" style="font-size:14px;color:var(--tx3)">person</span>';
+        h += '<strong>' + esc(p.naam) + '</strong>';
+        if (p.organisatie) h += ' <span style="color:var(--tx3)">(' + esc(p.organisatie) + ')</span>';
+        h += '</div>';
+      });
+      h += '</div>';
+    }
+
+    // Melding formulier (hidden, verschijnt bij klik)
+    h += '<div id="meldingForm" style="display:none;margin-top:16px"></div>';
+
     tc.innerHTML = h;
+
+    // Sla personen op voor gebruik in startMelding
+    window._meldpuntPersonen = overtreders;
   });
+}
+
+function startMelding(zaakId, personIndex) {
+  var p = (window._meldpuntPersonen || [])[personIndex];
+  if (!p) return;
+
+  var el = document.getElementById('meldingForm');
+  if (!el) return;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth' });
+
+  var h = '<div class="card" style="border-color:var(--red)">';
+  h += '<h3 style="font-size:15px;margin-bottom:16px"><span class="mi" style="color:var(--red)">flag</span> Melding indienen over ' + esc(p.naam) + '</h3>';
+  h += '<div class="form-group"><label class="form-label">Ambtenaar</label><input class="form-input" id="mpNaam" value="' + esc(p.naam) + '"></div>';
+  h += '<div class="form-group"><label class="form-label">Organisatie</label><input class="form-input" id="mpInstantie" value="' + esc(p.organisatie || '') + '"></div>';
+  h += '<div class="form-group"><label class="form-label">Functie</label><input class="form-input" id="mpFunctie" value="' + esc(p.functie || '') + '"></div>';
+  h += '<div class="form-group"><label class="form-label">Overtredingen</label><textarea class="form-input" id="mpVerhaal" rows="6">' + esc(p.overtredingen || '') + '</textarea></div>';
+  h += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">';
+  h += '<input type="checkbox" id="mpAnoniem"> <label for="mpAnoniem" style="font-size:13px">Anoniem indienen</label>';
+  h += '</div>';
+  h += '<div style="display:flex;gap:8px">';
+  h += '<button class="btn btn-red" onclick="submitMelding(\'' + zaakId + '\')"><span class="mi">send</span> Melding indienen</button>';
+  h += '<button class="btn btn-ghost" onclick="document.getElementById(\'meldingForm\').style.display=\'none\'">Annuleren</button>';
+  h += '</div>';
+  h += '<div id="mpResult" style="margin-top:12px"></div>';
+  h += '</div>';
+
+  el.innerHTML = h;
 }
 
 function submitMelding(zaakId) {
